@@ -18,6 +18,18 @@ var m = 4;
 var k = 7;
 var cardName;
 switch (k) {
+    case 2:
+        cardName = b[0];
+        break;
+    case 3:
+        cardName = b[1];
+        break;
+    case 4:
+        cardName = b[2];
+        break;
+    case 5:
+        cardName = b[3];
+        break;
     case 6:
         cardName = b[4];
         break;
