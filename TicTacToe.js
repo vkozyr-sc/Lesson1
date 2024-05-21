@@ -59,7 +59,7 @@ function game(a, b){
     else{
         board[a][b] = "o";
     }
-    console.log(board);
+    console.table(board);
     let check = checkVictory(currentState);
     switch (currentState) {
         case states.Player1:
@@ -71,9 +71,7 @@ function game(a, b){
         default:
             break;
     }
-    console.log(check);
     if(check){
-        console.log("сработало");
         currentState = states.Player1;
     }
 }
@@ -84,15 +82,13 @@ set(2,0)
 set(1,1)
 set(0,2)
 set(2,2)
-console.log("ВТОРОЙ ЗАХОД");
-console.log(currentState);
+console.log("Второй раунд");
 set(0,0)
 set(1,0)
 set(1,1)
 set(2,0)
 set(2,2)
-console.log("ТРЕТИЙ ПОШЕЛ");
-console.log(currentState);
+console.log("Третий раунд");
 set(0,0)
 set(1,0)
 set(1,1)
