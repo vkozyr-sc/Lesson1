@@ -27,15 +27,20 @@ let currentState = states.Player1;
 function set(a,b){
     if(put(a,b,"x")){
         // console.log("До бота: " + currentState);
+        let check = checkVictory(currentState);
+        if(check){
+            currentState = states.Player1;
+            return;
+        }        
         currentState = changeState(currentState);
         bot();
         // console.log("После бота: " + currentState);
         console.table(board);
-        let check = checkVictory(currentState);
+        check = checkVictory(currentState);
         currentState = changeState(currentState);
         if(check){
             currentState = states.Player1;
-        }        
+        }
     }
 }
 
@@ -86,16 +91,16 @@ function result(res){
     currentState = states.Player1;
 }
 
-function draw(){
-    console.log("НИЧЬЯ!");
-    board = [
-        ['?', '?', '?'],
-        ['?', '?', '?'],
-        ['?', '?', '?'],
-    ];
-    console.log(board);
-    currentState = states.Player1;
-}
+// function draw(){
+//     console.log("НИЧЬЯ!");
+//     board = [
+//         ['?', '?', '?'],
+//         ['?', '?', '?'],
+//         ['?', '?', '?'],
+//     ];
+//     console.log(board);
+//     currentState = states.Player1;
+// }
 
 function checkVictory(currentState){
     let currentSign;
@@ -148,24 +153,33 @@ function victory(sign, check){
             //console.log(pos);
             if(put(pos[0], pos[1], "o")){
                 if(sign === "x"){
-                    // console.log("Не дало победить");
+                    console.log("Не дало победить");
                 }
                 if(sign === "o"){
-                    // console.log("Победило");
+                    console.log("Победило");
                 }
                 count = 0;
                 if(sign === "o"){ return 1;}
                 if(sign === "x"){ return 2;}    
             }
         }
-        if(count === 1 && check === "z" && i >= 6){
+        if(count === 1 && check === "!center" && i >= 6){
             if(put(pos[0], pos[1], "o")){
-                // console.log("тыкнуло куда-нибудь");
+                console.log("тыкнуло куда-нибудь");
                 count = 0;
-                if(sign === "o" && check === "z"){ return 3;}    
-                if(sign === "x" && check === "z"){ return 3;}    
+                if(sign === "o" && check === "!center"){ return 3;}    
+                if(sign === "x" && check === "!center"){ return 3;}    
             }
         }
+        if(count === 1 && check === "center" && (i === 1 || i === 4)){
+            if(put(pos[0], pos[1], "o")){
+                console.log("тыкнуло ферзевый гамбит");
+                count = 0;
+                if(sign === "o" && check === "center"){ return 3;}    
+                if(sign === "x" && check === "center"){ return 3;}    
+            }
+        }
+
         count = 0;
     }
     return 0;
@@ -184,45 +198,117 @@ function setRand(){
            corner.splice(i, 1); 
         }        
     }
-    let randNum = getRandom(0, corner.length - 1);
-    let cell = corner[randNum];
-    put(cell[0], cell[1], "o");
-    
+
+    while(true){
+        let randNum = getRandom(0, corner.length - 1);
+        let cell = corner[randNum];
+        console.log(randNum);  
+        if(board[cell[0]][cell[1]] === '?'){
+            put(cell[0], cell[1], "o");
+            console.log("поставило ранд");
+            break;  
+        }
+    }
 }
+
+// function bot(){
+//     let center;
+//     let firstMove = true;
+//     return function botOptions(){
+//         if(board[1][1] === '?' && firstMove){
+//             put(1,1,"o");
+//             center = true;
+//             firstMove = false;
+//             //return;
+//         }
+//         else if(firstMove){
+//             setRand();
+//             center = false;
+//             firstMove = false;
+//         }    
+//         if(!center && !firstMove){
+//             let check = 0;
+//             if(check === 0){
+//                 console.log("Ставит третий знак");
+//                 check = victory("o");
+//             }
+//             if(check === 0){
+//                 console.log("Не дает победить противнику");
+//                 check = victory("x");
+//             }
+//             if(check === 0){ 
+//                 console.log("Куда-нибудь от 'o'");
+//                 check = victory("o", "!center");
+//             }
+//             if(check === 0){ 
+//                 console.log("Куда-нибудь от 'x'");
+//                 setRand();
+//                 // console.log("check: " + check);
+//             }        
+//         }
+//         else if(center && !firstMove){
+//             let check = 0;
+//             if(check === 0){
+//                 console.log("Ставит третий знак");
+//                 check = victory("o");
+//             }
+//             if(check === 0){
+//                 console.log("Не дает победить противнику");
+//                 check = victory("x");
+//             }
+//             if(check === 0){
+//                 console.log("ферзевый гамбит");
+//                 check = victory("center");
+//             }
+//         }
+//     }
+
+// }
 
 function bot(){
     let check = 0;
+    let center;
     if(board[1][1] === '?'){
         put(1,1,"o");
         return;
     }
+    if(board[1][1] === 'o'){center = true;}
+    else{center = false;}
     // else if(board[0][0] === '?'){
     //     put(0,0,"o");
     //     check = 1;
     // }
     // console.log("check: " + check);
     if(check === 0){
-        // console.log("Ставит третий знак");
+        console.log("Ставит третий знак");
         check = victory("o");
     }
     if(check === 0){
-        // console.log("Не дает победить противнику");
+        console.log("Не дает победить противнику");
         check = victory("x");
     }
+    if(check === 0 && center){
+        console.log("ферзевый гамбит");
+        check = victory("o","center");
+    }
     if(check === 0){ 
-        // console.log("Куда-нибудь от 'o'");
+        console.log("Куда-нибудь от 'o'");
         check = victory("o", "z");
     }
     if(check === 0){ 
-        // console.log("Куда-нибудь от 'x'");
+        console.log("Куда-нибудь от 'x'");
         setRand();
         // console.log("check: " + check);
     }
 
 }
+
+
 function print(){
     console.table(board);
 }
+
+//set(1,1)
 
 function test(){
     for (let i = 0; i < victoryCombination.length; i++) {
