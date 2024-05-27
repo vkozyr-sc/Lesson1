@@ -26,7 +26,6 @@ let currentState = states.Player1;
 
 function set(a,b){
     if(put(a,b,"x")){
-        // console.log("До бота: " + currentState);
         let check = checkVictory(currentState);
         if(check){
             currentState = states.Player1;
@@ -34,7 +33,6 @@ function set(a,b){
         }        
         currentState = changeState(currentState);
         bot();
-        // console.log("После бота: " + currentState);
         console.table(board);
         check = checkVictory(currentState);
         currentState = changeState(currentState);
@@ -49,11 +47,9 @@ function changeState(currentState){
         case states.Player1:
             currentState = states.Player2;
             return currentState;
-            break;
         case states.Player2:
             currentState = states.Player1;
             return currentState;
-            break;
         default:
             break;
     }
@@ -90,17 +86,6 @@ function result(res){
     console.log(board);
     currentState = states.Player1;
 }
-
-// function draw(){
-//     console.log("НИЧЬЯ!");
-//     board = [
-//         ['?', '?', '?'],
-//         ['?', '?', '?'],
-//         ['?', '?', '?'],
-//     ];
-//     console.log(board);
-//     currentState = states.Player1;
-// }
 
 function checkVictory(currentState){
     let currentSign;
@@ -272,8 +257,8 @@ function bot(){
         put(1,1,"o");
         return;
     }
-    if(board[1][1] === 'o'){center = true;}
-    else{center = false;}
+    if(board[1][1] === 'o'){ center = true; }
+    else{ center = false; }
     // else if(board[0][0] === '?'){
     //     put(0,0,"o");
     //     check = 1;
