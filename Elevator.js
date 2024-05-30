@@ -8,63 +8,101 @@ class Building {
 
     startProcess() {
         this.generate();
+		// for(let fl of this.floors){
+		// 	console.table(fl.persons);
+		// }
+		for(let i = 0; i < this.floors.length; i++){
+			let fl = this.floors[i];
+			// let nextFl = 0;
+			// let check = false;
+			// if(i !== (this.floors.length - 1)){
+			// 	nextFl = this.floors[i + 1];
+			// 	if(nextFl.persons.length === 0){
+			// 		for (let pers of this.lift.personsInLift) {
+			// 			if(pers.desiredFloor === nextFl.floorNumber){
+			// 				check = true;
+			// 			}
+			// 		}
+			// 	}
+			// }
+			// if(check === false){ continue; }
+			console.log('\n');
+			console.log(fl.persons);
+			this.lift.fillLift(fl.persons, fl.floorNumber);
+			console.log(`МЫ НА ${this.lift.currentFloor} ЭТАЖЕ`);
+			this.amountPersons -= this.lift.move();
+			this.lift.fillLift(fl.persons, fl.floorNumber);
+			console.table(this.lift.personsInLift);
+		}
+		console.log('-----------');
 		for(let fl of this.floors){
 			console.log(fl);
 		}
-		
+		console.log('allPers: ' + this.amountPersons);
+		console.log(this.lift.personsInLift);
+		console.log(this.lift);
     }
     generate(){
 		let emptyFloor = getRandom(2,8,10);
-		console.log(emptyFloor);
-		let summ = 0;
+		console.log('emptyFloor: ' + emptyFloor);
+		let allPers = this.amountPersons;
 		for (let i = 1; i <= this.floorsNumber; i++) {
-			// if(i === emptyFloor - 1){
-			// 	const floor = new Floor(emptyFloor, 0);
-			// 	this.floors.push(floor);
-			// }
-			// else{
-			// 	let j = i + 1;
-			// 	let personsOnFloor;
-			// 	personsOnFloor = getRandom(0,20,101);
-			// 	if(i === this.floorsNumber - 1){
-			// 		personsOnFloor = this.amountPersons; 
-			// 	}
-			// 	this.amountPersons -= personsOnFloor;
-			// 	if(this.amountPersons <= 0){
-			// 		this.amountPersons = 0;
-			// 		personsOnFloor = 0;
-			// 	}
-			// 	console.log("amountPerson: " + this.amountPersons);
-			// 	console.log("pesonOnFloor: " + personsOnFloor);
-			// 	const floor = new Floor(j, personsOnFloor);		
-			// 	this.floors.push(floor);	
-			// }
-			let personsOnFloor = getRandom(0,20);
+			let personsOnFloor = getRandom(7,16);
 			if(i === emptyFloor){
 				personsOnFloor = 0;
 			}
 			if(i === this.floorsNumber){
-				personsOnFloor = this.amountPersons;
+				personsOnFloor = allPers;
 			}
-			this.amountPersons -= personsOnFloor;
-			summ += personsOnFloor;
-			console.log("amountPerson: " + this.amountPersons);
-			console.log("pesonOnFloor: " + personsOnFloor);
+			allPers -= personsOnFloor;
 			const floor = new Floor(i, personsOnFloor);
 			this.floors.push(floor);
 		}
-		console.log("personOn: " + summ);
-		this.lift = new Elevator(6, 'up', 0, 1);
+		this.lift = new Elevator(6, 'up', [], 1);
 		console.log(this.lift);
 	}
+	
 }
 
 class Elevator {
+	personsInLift = [];
 	constructor(capacity, direction, personsInLift, currentFloor) {
 		this.capacity = capacity;
 		this.direction = direction;
 		this.personsInLift = personsInLift;
 		this.currentFloor = currentFloor;
+	}
+
+	fillLift(persons, cFloor){
+		let amountDesired = 0;
+		let desiredPersons = [];
+		if(this.personsInLift !== 0){
+			amountDesired = this.capacity - this.personsInLift.length;
+			desiredPersons = persons.splice(0, amountDesired);
+		}
+		else{
+			amountDesired = this.capacity;
+			desiredPersons = persons.splice(0, amountDesired);
+		}
+		console.log(`необходимое количество в лифт ${amountDesired}`);
+		console.log(`необходимое люди:\n`);
+		console.log(desiredPersons);
+		this.personsInLift = this.personsInLift.concat(desiredPersons);
+		console.log('в лифте: ');
+		console.log(this.personsInLift);
+		this.currentFloor = cFloor;
+	}
+
+	move(){
+		let remove = [];
+		for (let i = this.personsInLift.length - 1; i >= 0; i--) {
+			if(this.currentFloor === this.personsInLift[i].desiredFloor){
+				remove = remove.concat(this.personsInLift.splice(i, 1));
+			}
+		}
+		console.log(`deleted amount ${remove.length},\n кто вышел: `);
+		console.log(remove);
+		return remove.length;
 	}
 
 }
@@ -83,15 +121,17 @@ class Floor {
 		}
 	}
 
-
 }
 
 class Person {
 	currentFloor;
 	desiredFloor;
+	direction;
     constructor(currentFloor, desiredFloor) {
 		this.currentFloor = currentFloor;
 		this.desiredFloor = desiredFloor;
+		if(this.currentFloor - this.desiredFloor > 0){this.direction = "down";}
+		else{this.direction = "up";}
 	}
 }
 
@@ -101,7 +141,6 @@ function getRandom(min, max, ecxept) {
 	let randNum = Math.floor(Math.random() * (max - min + 1)) + min;
 	while(randNum === ecxept){
 		randNum = Math.floor(Math.random() * (max - min + 1)) + min;
-		return randNum;
 	}
 	return randNum;
 }
@@ -109,4 +148,4 @@ function getRandom(min, max, ecxept) {
 
 const building = new Building(9, 100);
 building.startProcess();
-console.log(building);
+//console.log(building);
