@@ -11,34 +11,35 @@ class Building {
 		// for(let fl of this.floors){
 		// 	console.table(fl.persons);
 		// }
-		for(let i = 0; i < this.floors.length; i++){
-			let fl = this.floors[i];
-			// let nextFl = 0;
-			// let check = false;
-			// if(i !== (this.floors.length - 1)){
-			// 	nextFl = this.floors[i + 1];
-			// 	if(nextFl.persons.length === 0){
-			// 		for (let pers of this.lift.personsInLift) {
-			// 			if(pers.desiredFloor === nextFl.floorNumber){
-			// 				check = true;
-			// 			}
-			// 		}
-			// 	}
-			// }
-			// if(check === false){ continue; }
-			console.log('\n');
-			console.log(fl.persons);
-			this.lift.fillLift(fl.persons, fl.floorNumber);
-			console.log(`МЫ НА ${this.lift.currentFloor} ЭТАЖЕ`);
-			this.amountPersons -= this.lift.move();
-			this.lift.fillLift(fl.persons, fl.floorNumber);
-			console.table(this.lift.personsInLift);
+		while(this.amountPersons > 0){
+			for(let i = 0; i < this.floors.length; i++){
+				let fl = this.floors[i];
+				console.log('\n');
+				console.log(fl.persons);
+				this.lift.fillLift(fl.persons, fl.floorNumber);
+				console.log(`МЫ НА ${this.lift.currentFloor} ЭТАЖЕ`);
+				this.amountPersons -= this.lift.move();
+				this.lift.fillLift(fl.persons, fl.floorNumber);
+				console.table(this.lift.personsInLift);
+			}
+			console.log("ЕДЕМ ВНИЗ");
+			for(let i = this.floors.length - 1; i >= 0; i--){
+				let fl = this.floors[i];
+				console.log('\n');
+				console.log(fl.persons);
+				this.lift.fillLift(fl.persons, fl.floorNumber);
+				console.log(`МЫ НА ${this.lift.currentFloor} ЭТАЖЕ`);
+				this.amountPersons -= this.lift.move();
+				this.lift.fillLift(fl.persons, fl.floorNumber);
+				console.table(this.lift.personsInLift);
+			}
+			console.log('allPers: ' + this.amountPersons);
 		}
+
 		console.log('-----------');
 		for(let fl of this.floors){
 			console.log(fl);
 		}
-		console.log('allPers: ' + this.amountPersons);
 		console.log(this.lift.personsInLift);
 		console.log(this.lift);
     }
