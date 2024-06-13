@@ -76,7 +76,7 @@ class Building {
 	}
 
 	checkEmptyFloors(currentFloor, direction){
-		let check = true;
+		let check = false;
 		if(currentFloor.floorNumber === 9 && direction === 1){
 			return 8;
 		}
@@ -89,20 +89,25 @@ class Building {
 		if(nextFloor.persons.length === 0 ){
 			check = false;
 		}
+		else{ check = true; }
 		this.lift.personsInLift.forEach(person => {
 			if(nextFloor.floorNumber === person.desiredFloor){
 				check = true;
 			}
 		});
+		let flNum;
 		if(check){ 
-			let flNum = currentFloor.floorNumber - 1
+			flNum = currentFloor.floorNumber - 1
 			console.log("вернуло " + flNum);
 			return flNum; 		
 		}
 		else{ 
-			console.log("рекурсия");
-			// infity loop
-			return this.checkEmptyFloors(this.floors[nextFloor.floorNumber - 1], direction) 
+			// // infinity loop
+			// currentFloor = this.floors[nextFloor.floorNumber - 2];
+			// return this.checkEmptyFloors(currentFloor, direction) 
+			flNum = nextFloor.floorNumber - 1;
+			console.log("рекурсия\n пропущен этаж: " + flNum);
+			return flNum;
 		}
 
 	}
@@ -217,7 +222,6 @@ function getRandom(min, max, ecxept) {
 	}
 	return randNum;
 }
-
 
 const building = new Building(9, 100);
 building.startProcess();
