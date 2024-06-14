@@ -23,11 +23,13 @@
 
 .inner-block {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 50px;
+    left: 50px;
     width: 100px;
     height: 100px;
     background-color: aqua;
+    /* border: 3px solid #00ffaa; */
+    /* border-radius: 45px; */
     cursor: pointer;
     display: none;
 }

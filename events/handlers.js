@@ -1,31 +1,31 @@
 const POSITIONS = [
   {
-    left: 0,
-    top: 0,
+    left: 50, // 0, 0
+    top: 50,
   },
   {
     left: 150,
     top: 0,
   },
   {
-    left: 300,
-    top: 0,
+    left: 250, // 300, 0
+    top: 50,
   },
   {
     left: 300,
     top: 150,
   },
   {
-    left: 300,
-    top: 300,
+    left: 250, // 300, 300
+    top: 250,
   },
   {
     left: 150,
     top: 300,
   },
   {
-    left: 0,
-    top: 300,
+    left: 50, // 0 , 300
+    top: 250,
   },
   {
     left: 0,
@@ -37,11 +37,10 @@ const POSITIONS = [
   document.addEventListener("DOMContentLoaded", () => {
     let withEventHandler = false;
     let pos = 0;
-    let pos2 = 0;
 
     const button = document.getElementById("event-button");
     const innerBlock = document.getElementById('inner-block');
-    const inner2Block = document.getElementById('inner2-block');
+    // const inner2Block = document.getElementById('inner2-block');
     // const outerBlock = document.getElementById("outer-block");
     // const innerBlock = document.createElement("div");
     // innerBlock.className = "inner-block";
@@ -52,8 +51,8 @@ const POSITIONS = [
       //console.log(pos);
       innerBlock.style.top = `${POSITIONS[pos].top}px` ;
       innerBlock.style.left = `${POSITIONS[pos].left}px`;
-      inner2Block.style.top = `${POSITIONS[pos].top}px` ;
-      inner2Block.style.left = `${POSITIONS[pos].left}px`;
+      // inner2Block.style.top = `${POSITIONS[pos].top}px` ;
+      // inner2Block.style.left = `${POSITIONS[pos].left}px`;
     };
 
     const inner2BlockClickHandler = () => {
@@ -62,8 +61,8 @@ const POSITIONS = [
       console.log(pos);
       innerBlock.style.top = `${POSITIONS[pos].top}px` ;
       innerBlock.style.left = `${POSITIONS[pos].left}px`;
-      inner2Block.style.top = `${POSITIONS[pos].top}px` ;
-      inner2Block.style.left = `${POSITIONS[pos].left}px`;
+      // inner2Block.style.top = `${POSITIONS[pos].top}px` ;
+      // inner2Block.style.left = `${POSITIONS[pos].left}px`;
     };
   
     // const outerBlockClickHandler = (event) => {
@@ -79,17 +78,17 @@ const POSITIONS = [
       button.innerHTML = withEventHandler ? "Remove Block" : "Add Block";
       if (withEventHandler) {
         // outerBlock.addEventListener("click", outerBlockClickHandler);
-        innerBlock.addEventListener('click', innerBlockClickHandler);
+        innerBlock.addEventListener('mouseover', innerBlockClickHandler);
         innerBlock.style.display = "block";
-        inner2Block.addEventListener('click', inner2BlockClickHandler);
-        inner2Block.style.display = "block";
+        // inner2Block.addEventListener('mouseover', inner2BlockClickHandler);
+        // inner2Block.style.display = "block";
       } 
       else {
         // outerBlock.removeEventListener("click", outerBlockClickHandler);
-        innerBlock.removeEventListener('click', innerBlockClickHandler);
+        innerBlock.removeEventListener('mouseover', innerBlockClickHandler);
         innerBlock.style.display = "none";
-        inner2Block.removeEventListener('click', inner2BlockClickHandler);
-        inner2Block.style.display = "none";
+        // inner2Block.removeEventListener('mouseover', inner2BlockClickHandler);
+        // inner2Block.style.display = "none";
       }
     });
   });
