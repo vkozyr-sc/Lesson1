@@ -16,13 +16,14 @@ class Building {
 			for(let fl of this.floors){
 				console.log(`на ${fl.floorNumber} этаже: ${fl.persons.length}`);
 			}
-			for(let i = this.lift.currentFloor - 1; i < this.floors.length; i++){
+			for(let i = 0; i < this.floors.length; i++){
 				//console.log(this.lift.currentFloor);
-				console.log("i до: " + i);
-				i = this.checkEmptyFloors(this.floors[i], 1);
+				// console.log("i до: " + i);
+				// let check = this.checkEmptyFloors(this.floors[i], 1);
+				// if(check === false){ continue; } 
 				// проще не обрабывать граничные значения
 				// дело скорее всего в while
-				console.log("i после: " + i);
+				// console.log("i после: " + i);
 				iterations++;
 				removed = this.move(this.floors[i], removed);
 			}
@@ -34,10 +35,11 @@ class Building {
 			for(let fl of this.floors){
 				console.log(`на ${fl.floorNumber} этаже: ${fl.persons.length}`);
 			}
-			for(let i = this.lift.currentFloor - 1; i >= 0; i--){
-				console.log("i до: " + i);
-				i = this.checkEmptyFloors(this.floors[i], -1);
-				console.log("i после: " + i);
+			for(let i = this.floors.length - 1; i >= 0; i--){
+				// console.log("i до: " + i);
+				// let check = this.checkEmptyFloors(this.floors[i], -1);
+				// if(check === false){ continue; } 
+				// console.log("i после: " + i);
 				iterations++;
 				removed = this.move(this.floors[i], removed);
 			}
@@ -76,38 +78,38 @@ class Building {
 	}
 
 	checkEmptyFloors(currentFloor, direction){
-		let check = false;
+		let check = true;
 		if(currentFloor.floorNumber === 9 && direction === 1){
-			return 8;
+			return true;
 		}
 		else if(currentFloor.floorNumber === 1 && direction === -1){
-			return 0;
+			return true;
 		}
 		console.log("curflor " + currentFloor.floorNumber);
 		let nextFloor = this.floors[(currentFloor.floorNumber - 1) + direction];
 		console.log("nextCurFlor " + nextFloor.floorNumber);
-		if(nextFloor.persons.length === 0 ){
-			check = false;
+		if(nextFloor.persons.length > 0 ){
+			check = true;
 		}
-		else{ check = true; }
+		else{ check = false; }
 		this.lift.personsInLift.forEach(person => {
 			if(nextFloor.floorNumber === person.desiredFloor){
 				check = true;
 			}
 		});
-		let flNum;
-		if(check){ 
-			flNum = currentFloor.floorNumber - 1
-			console.log("вернуло " + flNum);
-			return flNum; 		
+		//let flNum;
+		if(check === true){ 
+			// flNum = currentFloor.floorNumber - 1
+			// console.log("вернуло " + flNum);
+			return true; 		
 		}
 		else{ 
 			// // infinity loop
 			// currentFloor = this.floors[nextFloor.floorNumber - 2];
 			// return this.checkEmptyFloors(currentFloor, direction) 
-			flNum = nextFloor.floorNumber - 1;
-			console.log("рекурсия\n пропущен этаж: " + flNum);
-			return flNum;
+			// flNum = nextFloor.floorNumber - 1;
+			// console.log("рекурсия\n пропущен этаж: " + flNum);
+			return false;
 		}
 
 	}
