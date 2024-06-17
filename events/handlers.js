@@ -40,7 +40,7 @@ const POSITIONS = [
 
     const button = document.getElementById("event-button");
     const innerBlock = document.getElementById('inner-block');
-    // const inner2Block = document.getElementById('inner2-block');
+    const inner2Block = document.getElementById('inner2-block');
     // const outerBlock = document.getElementById("outer-block");
     // const innerBlock = document.createElement("div");
     // innerBlock.className = "inner-block";
@@ -51,8 +51,8 @@ const POSITIONS = [
       //console.log(pos);
       innerBlock.style.top = `${POSITIONS[pos].top}px` ;
       innerBlock.style.left = `${POSITIONS[pos].left}px`;
-      // inner2Block.style.top = `${POSITIONS[pos].top}px` ;
-      // inner2Block.style.left = `${POSITIONS[pos].left}px`;
+      inner2Block.style.top = `${POSITIONS[pos].top}px` ;
+      inner2Block.style.left = `${POSITIONS[pos].left}px`;
     };
 
     const inner2BlockClickHandler = () => {
@@ -61,8 +61,8 @@ const POSITIONS = [
       console.log(pos);
       innerBlock.style.top = `${POSITIONS[pos].top}px` ;
       innerBlock.style.left = `${POSITIONS[pos].left}px`;
-      // inner2Block.style.top = `${POSITIONS[pos].top}px` ;
-      // inner2Block.style.left = `${POSITIONS[pos].left}px`;
+      inner2Block.style.top = `${POSITIONS[pos].top}px` ;
+      inner2Block.style.left = `${POSITIONS[pos].left}px`;
     };
   
     // const outerBlockClickHandler = (event) => {
@@ -78,17 +78,17 @@ const POSITIONS = [
       button.innerHTML = withEventHandler ? "Remove Block" : "Add Block";
       if (withEventHandler) {
         // outerBlock.addEventListener("click", outerBlockClickHandler);
-        innerBlock.addEventListener('mouseover', innerBlockClickHandler);
+        innerBlock.addEventListener('click', innerBlockClickHandler);
         innerBlock.style.display = "block";
-        // inner2Block.addEventListener('mouseover', inner2BlockClickHandler);
-        // inner2Block.style.display = "block";
+        inner2Block.addEventListener('click', inner2BlockClickHandler);
+        inner2Block.style.display = "block";
       } 
       else {
         // outerBlock.removeEventListener("click", outerBlockClickHandler);
-        innerBlock.removeEventListener('mouseover', innerBlockClickHandler);
+        innerBlock.removeEventListener('click', innerBlockClickHandler);
         innerBlock.style.display = "none";
-        // inner2Block.removeEventListener('mouseover', inner2BlockClickHandler);
-        // inner2Block.style.display = "none";
+        inner2Block.removeEventListener('click', inner2BlockClickHandler);
+        inner2Block.style.display = "none";
       }
     });
   });
