@@ -25,8 +25,8 @@ body{
 
 .board{
     width: 60%;
-    height: calc(100hv - 4px);
-    border: 2px solid #B5838D;
+    /* height: calc(100hv - 4px); */
+    /* border: 2px solid #B5838D; */
 }
 
 .info{
@@ -38,8 +38,8 @@ body{
 .fields {
     margin-top: 50px;
     margin-left: 50px;
-    width: 300px;
-    height: 300px;
+    width: 800px;
+    height: 800px;
     border: 1px solid black;
 }
 
@@ -56,7 +56,19 @@ body{
     border: 1px solid red;
     cursor: pointer;
 
+    position: relative;
     font-size: 40px;
-    text-align: center;
-    vertical-align: middle;
+    /* text-align: center;
+    vertical-align: middle; */
+}
+
+.checker {
+    position: absolute;
+    left: 15%;
+    top: 15%;
+    width: 70%; 
+    height: 70%;
+    background-color: red;
+    border-radius: 50px;
+    cursor: pointer;
 }
