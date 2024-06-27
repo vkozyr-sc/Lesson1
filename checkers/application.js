@@ -19,20 +19,30 @@ class Cell {
 
 // TODO
 // Проблема с синхронизацией:
-// 	шашки есть у юзера и доски
-// 	доска есть у правил и партии
+// 	шашки есть у юзера и доски(не напрямую, в доске есть клетки, в клетке шашки)
+// 	доска есть у правил и партии +-
 // Ход назад через бой
+
+// сделать смену состояний в партии для бота и игрока
+// переделать вызов .move()
+// добавить функционал для кнопки start
 
 class Game {
   board;
   user;
   bot;
+  rules;
 
   startGame() {
     this.generateHTML()
       .then(() => {
         console.log("Игра началась");
-        this.user.move();
+        let board = this.user.move();
+        if(board){
+          this.board = board;
+          this.rules.board = board;
+        }
+
         console.log(this.user);
         console.log(this.board);
       })
@@ -124,6 +134,7 @@ class Game {
         let rules = new Rules(board);
         const user = new User(whiteCheckers, rules);
         const bot = new Bot(blackCheckers, rules);
+        this.rules = rules;
         this.board = board;
         this.user = user;
         this.bot = bot;
@@ -153,7 +164,7 @@ class Rules {
     let color;
     color = state === "firstClick" ? checkers.color : checkers[0].color;
     let direction = color === "white" ? -1 : 1;
-    console.log(color);
+    // console.log(color);
     //onsole.log(direction);
 
     if (state === "noClick")
@@ -168,7 +179,7 @@ class Rules {
     // this.board.cells[6][3].checker = false;
     // this.board.cells[6][5].checker = false;
 
-    console.log(this.board.cells);
+    // console.log(this.board.cells);
     for (let i = 0; i < checkers.length; i++) {
       let newI = checkers[i].positions[0] + direction;
       let newJ = checkers[i].positions[1];
@@ -186,7 +197,7 @@ class Rules {
           continue;
         }
       }
-      console.log(`newI: ${newI} newJ: ${newJ}`);
+      // console.log(`newI: ${newI} newJ: ${newJ}`);
       if (!this.board.cells[newI][newJ + 1].checker) {
         availableMove.push([newI - direction, newJ]);
       } else if (!this.board.cells[newI][newJ - 1].checker) {
@@ -272,41 +283,109 @@ class User {
     this.rules = rules;
   }
   move() {
-    this.currentState = this.clickStates.noClick;
+    // this.currentState = this.clickStates.noClick;
     // this.whiteCheckers.splice(5,2);
     // console.log(this.whiteCheckers);
-
+    
     const fields = document.getElementById("fields");
-    let avMove = this.rules.getAvailableMove(
+    let availableMove = this.rules.getAvailableMove(
       this.whiteCheckers,
       this.currentState
     );
-    console.log(avMove);
-    this.highlight(avMove, this.currentState);
+    let availableMove2;
+    let index;
+    // console.log(availableMove);
+    this.highlight(availableMove, this.currentState);
+
     fields.addEventListener("click", (event) => {
       let target = event.target;
       let checkType = convert(target, "index");
-      let check = false;
-      if (!checkType) return;
-      for (let one of avMove) {
-        if (one[0] === checkType[0] && one[1] === checkType[1]) {
-          check = true;
+      if (!checkType) return;  
+      
+      switch (this.currentState) {
+        case this.clickStates.noClick:
+          let check = false;
+          for (let one of availableMove) {
+            if (one[0] === checkType[0] && one[1] === checkType[1]) {
+              check = true;
+              break;
+            }
+          }
+          if (!check) return;    
+
+          this.currentState = this.clickStates.firstClick;
+          index = this.whiteCheckers.find(
+            (item) =>
+              item.positions[0] === checkType[0] &&
+              item.positions[1] === checkType[1]
+          );
+          console.log(index);
+          availableMove2 = this.rules.getAvailableMove(index, this.currentState);
+          console.log(availableMove2);
+          this.highlight(availableMove2, this.currentState);
           break;
-        }
+        case this.clickStates.firstClick:
+          let check2 = false;
+          for (let one of availableMove2) {
+            if (one[0] === checkType[0] && one[1] === checkType[1]) {
+              check2 = true;
+              break;
+            }
+          }
+          if (!check2) return;
+    
+          this.currentState = this.clickStates.secondClick;
+
+          console.log('--------');
+          console.log(checkType);
+          console.log(index);
+          console.log('--------');
+          let indexDesired = index;
+          indexDesired.positions[0] = checkType[0];
+          indexDesired.positions[0] = checkType[1];
+
+          for (let i = 0; i < this.whiteCheckers.length; i++) {
+            if(index === this.whiteCheckers[i]){
+              this.whiteCheckers[i].positions[0] = checkType[0];
+              this.whiteCheckers[i].positions[1] = checkType[1];
+            }            
+          }
+          let field, fieldDesired, checker;
+          for (let i = 0; i < this.rules.board.cells.length; i++) {
+            for (let j = 0; j < this.rules.board.cells.length; j++) {
+              if(index === this.rules.board.cells[i][j].checker){
+                this.rules.board.cells[i][j].checker = false;
+                field = document.getElementById(`field_${i}_${j}`);
+                checker = document.getElementById(`checker_${i}_${j}`);
+                field.removeChild(checker);
+              }
+              if(i === checkType[0] && j === checkType[1]){
+                this.rules.board.cells[i][j].checker = indexDesired;
+                fieldDesired = document.getElementById(`field_${i}_${j}`);
+              }
+            }
+          }
+          fieldDesired.appendChild(checker);
+
+          console.log(this.rules.board);
+          // изменить положение шашки у юзера
+          // изменить положение на доске (через return)
+          // изменить доску в партии и правилах
+          // изменить верстку
+
+          console.log('--------');
+
+          this.highlight(availableMove, this.clickStates.noClick);
+          this.currentState = this.clickStates.noClick;
+          return this.rules.board;
+          break;
+        // case this.clickStates.secondClick:
+        //   //this.highlight(availableMove, this.currentState);
+        //   break;
+        default:
+          break;
       }
-      if (!check) return;
-      this.currentState = this.clickStates.firstClick;
-      let index = this.whiteCheckers.find(
-        (item) =>
-          item.positions[0] === checkType[0] &&
-          item.positions[1] === checkType[1]
-      );
-      // let hype = [6,5];
-      // let megaHype = this.whiteCheckers.find(item => item.positions[0] === hype[0] && item.positions[1] === hype[1]);
-      console.log(index);
-      let move = this.rules.getAvailableMove(index, this.currentState);
-      console.log(move);
-			this.highlight(move, this.currentState);
+  
     });
   }
 
@@ -315,6 +394,14 @@ class User {
     switch (state) {
       case this.clickStates.noClick:
         let field;
+        for (let i = 0; i < 8; i++) {
+					for (let j = 0; j < 8; j++) {
+						const elem = document.getElementById(`field_${i}_${j}`);
+						if(elem.style.backgroundColor === "yellow"){
+							elem.style.backgroundColor = "gray";
+						}
+					}					
+				}
         for (let i = 0; i < moves.length; i++) {
           field = moves[i];
           const elem = document.getElementById(`field_${field[0]}_${field[1]}`);
@@ -366,7 +453,7 @@ function convert(target, option) {
         return firstWord;
       case "index":
         firstWord = match[1];
-        if (firstWord === "checker") {
+        if (firstWord === "checker" || firstWord === "field") {
           const i = parseInt(match[2], 10);
           const j = parseInt(match[3], 10);
           return [i, j];

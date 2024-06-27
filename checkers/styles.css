@@ -8,19 +8,19 @@ body{
     justify-content: space-between;
 }
 
-/* .event-button {
+.event-button {
     position: absolute;
     top: 240px;
-    left: 640px;
-    height: 20px;
-    width: 100px;
+    left: 900px;
+    height: 50px;
+    width: 200px;
     text-align: center;
     vertical-align: middle;
-    border: 1px solid #002fff;
+    border: 3px solid #002fff;
     background-color: #86021c;
     border-radius: 3px;
     cursor: pointer;
-} */
+}
 
 
 .board{
