@@ -11,12 +11,6 @@ class Cell {
   }
 }
 
-// const i = 2;
-// const j = 33;
-// const pos = [i,j]
-// const cell = new Cell(pos);
-// console.log(cell.postions[1]);
-
 // TODO
 // Проблема с синхронизацией:
 // 	шашки есть у юзера и доски(не напрямую, в доске есть клетки, в клетке шашки)
@@ -33,6 +27,13 @@ class Game {
   bot;
   rules;
 
+  whiteCheckerAmount
+
+  gameState = {
+    user : 'user',
+    bot: 'bot',
+  }
+  currentState = this.gameState.user;
   startGame() {
     this.generateHTML()
       .then(() => {
@@ -43,8 +44,9 @@ class Game {
           this.rules.board = board;
         }
 
-        console.log(this.user);
-        console.log(this.board);
+        // let check = this.rules.checkWin();
+        // console.log(this.user);
+        // console.log(this.board);
       })
       .catch((error) => {
         console.error("Ошибка при инициализации игры:", error);
@@ -64,90 +66,57 @@ class Game {
           return;
         }
 
-        let whiteCheckers = [];
-        let blackCheckers = [];
-        let cells = [];
+        const whiteCheckers = [];
+        const blackCheckers = [];
+        const cells = [];
+
         for (let i = 0; i < 8; i++) {
           const row = document.createElement("div");
           row.id = `row_${i}`;
           row.className = "row";
           fields.append(row);
 
-          let rows = [];
-
+          const rows = [];
           for (let j = 0; j < 8; j++) {
             const field = document.createElement("div");
             const checker = document.createElement("div");
             field.id = `field_${i}_${j}`;
-            field.className = `field`;
-            field.innerHTML = "";
+            field.className = "field";
             row.append(field);
 
-            let cell = new Cell([i, j], false);
+            const cell = new Cell([i, j], false);
 
-            if (i % 2 === 0) {
-              if (j % 2 !== 0) {
-                field.style.backgroundColor = "gray";
-                if (i !== 4) {
-                  checker.id = `checker_${i}_${j}`;
-                  checker.className = "checker";
-                  if (i < 3) {
-                    checker.style.backgroundColor = "black";
-                    let blackChecker = new CommonChecker("black", [i, j]);
-                    blackCheckers.push(blackChecker);
-                    cell.checker = blackChecker;
-                  } else {
-                    checker.style.backgroundColor = "white";
-                    let whiteChecker = new CommonChecker("white", [i, j]);
-                    whiteCheckers.push(whiteChecker);
-                    cell.checker = whiteChecker;
-                  }
-                  field.append(checker);
-                }
-              }
-            } else if (i % 2 !== 0) {
-              if (j % 2 === 0) {
-                field.style.backgroundColor = "gray";
-                if (i !== 3) {
-                  checker.id = `checker_${i}_${j}`;
-                  checker.className = "checker";
-                  if (i < 3) {
-                    checker.style.backgroundColor = "black";
-                    let blackChecker = new CommonChecker("black", [i, j]);
-                    blackCheckers.push(blackChecker);
-                    cell.checker = blackChecker;
-                  } else {
-                    checker.style.backgroundColor = "white";
-                    let whiteChecker = new CommonChecker("white", [i, j]);
-                    whiteCheckers.push(whiteChecker);
-                    cell.checker = whiteChecker;
-                  }
-                  field.append(checker);
-                }
+            if ((i % 2 === 0 && j % 2 !== 0) || (i % 2 !== 0 && j % 2 === 0)) {
+              field.style.backgroundColor = "gray";
+              if (i < 3 || i > 4) {
+                checker.id = `checker_${i}_${j}`;
+                checker.className = "checker";
+                checker.style.backgroundColor = i < 3 ? "black" : "white";
+                const commonChecker = new CommonChecker(i < 3 ? "black" : "white", [i, j]);
+                if (i < 3) blackCheckers.push(commonChecker);
+                else whiteCheckers.push(commonChecker);
+                cell.checker = commonChecker;
+                field.append(checker);
               }
             }
+
             rows.push(cell);
           }
           cells.push(rows);
         }
+
         const board = new Board(cells);
-        let rules = new Rules(board);
-        const user = new User(whiteCheckers, rules);
-        const bot = new Bot(blackCheckers, rules);
+        const rules = new Rules(board);
         this.rules = rules;
         this.board = board;
-        this.user = user;
-        this.bot = bot;
+        this.user = new User(whiteCheckers, rules);
+        this.bot = new Bot(blackCheckers, rules);
 
         console.log("Инициализация завершена");
-        // console.table(this.board);
-        // console.table(this.user);
-
         resolve();
       });
     });
   }
-  generateObjects() {}
 }
 
 class Rules {
@@ -159,100 +128,36 @@ class Rules {
   isCorrect() {}
 
   getAvailableMove(checkers, state) {
-    console.log(state);
-    let result = [];
-    let color;
-    color = state === "firstClick" ? checkers.color : checkers[0].color;
-    let direction = color === "white" ? -1 : 1;
-    // console.log(color);
-    //onsole.log(direction);
+    const color = state === "firstClick" ? checkers.color : checkers[0].color;
+    const direction = color === "white" ? -1 : 1;
 
-    if (state === "noClick")
-      result = this.getAvailableMove_NoClick(checkers, direction);
-    else if (state === "firstClick")
-      result = this.getAvailableMove_FirstClick(checkers, direction);
-    return result;
+    return state === "noClick"
+      ? this.getAvailableMove_NoClick(checkers, direction)
+      : this.getAvailableMove_FirstClick(checkers, direction);
   }
 
   getAvailableMove_NoClick(checkers, direction) {
-    let availableMove = [];
-    // this.board.cells[6][3].checker = false;
-    // this.board.cells[6][5].checker = false;
+    return checkers.reduce((availableMove, checker) => {
+      const [i, j] = checker.positions;
+      const newI = i + direction;
+      const moves = [
+        [newI, j + 1],
+        [newI, j - 1]
+      ].filter(([x, y]) => x >= 0 && x < 8 && y >= 0 && y < 8 && !this.board.cells[x][y].checker);
 
-    // console.log(this.board.cells);
-    for (let i = 0; i < checkers.length; i++) {
-      let newI = checkers[i].positions[0] + direction;
-      let newJ = checkers[i].positions[1];
-      let newJRight, newJLeft;
-      if (newJ === 0) {
-        if (this.board.cells[newI][newJ + 1].checker) continue;
-        else {
-          availableMove.push([newI - direction, newJ]);
-          continue;
-        }
-      } else if (newJ === 7) {
-        if (this.board.cells[newI][newJ - 1].checker) continue;
-        else {
-          availableMove.push([newI - direction, newJ]);
-          continue;
-        }
-      }
-      // console.log(`newI: ${newI} newJ: ${newJ}`);
-      if (!this.board.cells[newI][newJ + 1].checker) {
-        availableMove.push([newI - direction, newJ]);
-      } else if (!this.board.cells[newI][newJ - 1].checker) {
-        availableMove.push([newI - direction, newJ]);
-      }
-    }
-    return availableMove;
+      return availableMove.concat(moves.map(([x, y]) => [x - direction, j]));
+    }, []);
   }
+  
+  getAvailableMove_FirstClick(checker, direction) {
+    const [i, j] = checker.positions;
+    const newI = i + direction;
+    const moves = [
+      [newI, j + 1],
+      [newI, j - 1]
+    ].filter(([x, y]) => x >= 0 && x < 8 && y >= 0 && y < 8 && !this.board.cells[x][y].checker);
 
-  getAvailableMove_FirstClick(checkers, direction) {
-    let availableMove = [];
-    let newI = checkers.positions[0] + direction;
-    let newJ = checkers.positions[1];
-    if (newJ === 0) {
-      if (!this.board.cells[newI][newJ + 1].checker) {
-        availableMove.push([newI, newJ + 1]);
-				return availableMove;
-      }
-    }
-    if (newJ === 7) {
-      if (!this.board.cells[newI][newJ - 1].checker) {
-        availableMove.push([newI, newJ - 1]);
-				return availableMove;
-      }
-    }
-
-    if (!this.board.cells[newI][newJ + 1].checker) {
-      availableMove.push([newI, newJ + 1]);
-    } 
-		if (!this.board.cells[newI][newJ - 1].checker) {
-      availableMove.push([newI, newJ - 1]);
-    }
-
-		return availableMove;
-    // if(newJ === 0) {
-    //   if(this.board.cells[newI][newJ + 1].checker) return;
-    //   else {
-    //     availableMove.push([newI - direction, newJ]);
-    //     return;
-    //   }
-    // }
-    // else if(newJ === 7){
-    //   if(this.board.cells[newI][newJ - 1].checker) return;
-    //   else {
-    //     availableMove.push([newI - direction, newJ]);
-    //     return;
-    //   }
-    // }
-    // console.log(`newI: ${newI} newJ: ${newJ}`);
-    // if(!this.board.cells[newI][newJ + 1].checker){
-    //   availableMove.push([newI - direction, newJ]);
-    // }
-    // else if(!this.board.cells[newI][newJ - 1].checker){
-    //   availableMove.push([newI - direction, newJ]);
-    // }
+    return moves;
   }
 }
 
@@ -286,17 +191,18 @@ class User {
     // this.currentState = this.clickStates.noClick;
     // this.whiteCheckers.splice(5,2);
     // console.log(this.whiteCheckers);
-    
+    // return new Promise((resolve, reject) => {
+      
+    // });
     const fields = document.getElementById("fields");
     let availableMove = this.rules.getAvailableMove(
-      this.whiteCheckers,
-      this.currentState
+    this.whiteCheckers,
+    this.currentState
     );
     let availableMove2;
     let index;
     // console.log(availableMove);
     this.highlight(availableMove, this.currentState);
-
     fields.addEventListener("click", (event) => {
       let target = event.target;
       let checkType = convert(target, "index");
@@ -351,6 +257,7 @@ class User {
             }            
           }
           let field, fieldDesired, checker;
+          let pos = [];
           for (let i = 0; i < this.rules.board.cells.length; i++) {
             for (let j = 0; j < this.rules.board.cells.length; j++) {
               if(index === this.rules.board.cells[i][j].checker){
@@ -362,9 +269,12 @@ class User {
               if(i === checkType[0] && j === checkType[1]){
                 this.rules.board.cells[i][j].checker = indexDesired;
                 fieldDesired = document.getElementById(`field_${i}_${j}`);
+                pos = [i,j];
               }
             }
           }
+          console.log(checker);
+          checker.id = `checker_${pos[0]}_${pos[1]}`;
           fieldDesired.appendChild(checker);
 
           console.log(this.rules.board);
@@ -375,13 +285,16 @@ class User {
 
           console.log('--------');
 
-          this.highlight(availableMove, this.clickStates.noClick);
           this.currentState = this.clickStates.noClick;
+          availableMove = this.rules.getAvailableMove(
+            this.whiteCheckers,
+            this.currentState
+          );
+          console.log(this.currentState);
+          console.log(availableMove);
+          this.highlight(availableMove, this.currentState);
           return this.rules.board;
           break;
-        // case this.clickStates.secondClick:
-        //   //this.highlight(availableMove, this.currentState);
-        //   break;
         default:
           break;
       }
@@ -391,37 +304,29 @@ class User {
 
   highlight(moves, state) {
     // console.log(fields);
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 8; j++) {
+        const elem = document.getElementById(`field_${i}_${j}`);
+        if(elem.style.backgroundColor === "aqua"){
+          elem.style.backgroundColor = "gray";
+        }
+      }					
+    }
     switch (state) {
       case this.clickStates.noClick:
         let field;
-        for (let i = 0; i < 8; i++) {
-					for (let j = 0; j < 8; j++) {
-						const elem = document.getElementById(`field_${i}_${j}`);
-						if(elem.style.backgroundColor === "yellow"){
-							elem.style.backgroundColor = "gray";
-						}
-					}					
-				}
         for (let i = 0; i < moves.length; i++) {
           field = moves[i];
           const elem = document.getElementById(`field_${field[0]}_${field[1]}`);
-          elem.style.backgroundColor = "yellow";
+          elem.style.backgroundColor = "aqua";
         }
         break;
       case this.clickStates.firstClick:
-				for (let i = 0; i < 8; i++) {
-					for (let j = 0; j < 8; j++) {
-						const elem = document.getElementById(`field_${i}_${j}`);
-						if(elem.style.backgroundColor === "yellow"){
-							elem.style.backgroundColor = "gray";
-						}
-					}					
-				}
 				let fieldss;
         for (let i = 0; i < moves.length; i++) {
           fieldss = moves[i];
           const elem = document.getElementById(`field_${fieldss[0]}_${fieldss[1]}`);
-          elem.style.backgroundColor = "yellow";
+          elem.style.backgroundColor = "aqua";
         }
 
         break;
@@ -434,6 +339,10 @@ class User {
 class Bot {
   constructor(blackCheckers) {
     this.blackCheckers = blackCheckers;
+  }
+
+  move(){
+    console.log('Бот походил');
   }
 }
 
