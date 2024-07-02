@@ -53,7 +53,7 @@ class Game {
   }
 
   nextMove(){
-    console.log("nextMove");
+    //console.log("nextMove");
     this.user.move()
     .then((board) => {
       // if (board) {
@@ -189,32 +189,32 @@ class Rules {
   checkIfUnderAttack(checkers) {
     return checkers.some(checker => {
       const possibleMoves = this.getPossibleAttacks(checker);
-      return possibleMoves.length > 0;
+      return possibleMoves;
     });
   }
 
   getPossibleAttacks(checker) {
-    const [x, y] = checker.positions;
+    const [i, j] = checker.positions;
     const directions = [
       [1, 1], [1, -1], [-1, 1], [-1, -1]
     ];
-    const possibleAttacks = [];
+    let possibleAttacks = [];
 
     for (let [dx, dy] of directions) {
-      const newX = x + dx * 2;
-      const newY = y + dy * 2;
-      const middleX = x + dx;
-      const middleY = y + dy;
+      const newI = i + dx * 2;
+      const newJ = j + dy * 2;
+      const middleI = i + dx;
+      const middleJ = j + dy;
 
-      if (this.isValidPosition(newX, newY) &&
-          this.board.cells[middleX][middleY].checker &&
-          this.board.cells[middleX][middleY].checker.color !== checker.color &&
-          !this.board.cells[newX][newY].checker) {
-        possibleAttacks.push([newX, newY]);
+      if (this.isValidPosition(newI, newJ) &&
+          this.board.cells[middleI][middleJ].checker &&
+          this.board.cells[middleI][middleJ].checker.color !== checker.color &&
+          !this.board.cells[newI][newJ].checker) {
+        possibleAttacks.push([newI, newJ]);
       }
     }
-
-    return possibleAttacks;
+    //console.log(possibleAttacks);
+    if(possibleAttacks.length > 0) return possibleAttacks;
   }
 
   isValidPosition(x, y) {
@@ -332,10 +332,19 @@ class User {
             this.highlight(availableMove, this.clickStates.noClick);
             this.currentState = this.clickStates.noClick;
 
-            // if (this.rules.checkIfUnderAttack(this.whiteCheckers)) {
-            //   console.log("Белые шашки под боем");
-            // }
-            
+            let underAttack = [];
+            for(checker of this.whiteCheckers){
+              let move = this.rules.getPossibleAttacks(checker);
+              console.log(move);
+              if(move) underAttack = underAttack.concat(move);
+            }
+            underAttack.push([3,2]);
+            console.log(underAttack);
+            if(underAttack.length > 0) {
+              console.log('if'); 
+              this.highlight(underAttack, this.clickStates.noClick);
+            }
+
             fields.removeEventListener("click", handleClick);
             resolve(this.rules.board);
             break;
