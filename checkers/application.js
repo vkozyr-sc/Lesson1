@@ -193,7 +193,7 @@ class Rules {
     });
   }
 
-  getPossibleAttacks(checker) {
+  getPossibleAttacks(checker, state) {
     const [i, j] = checker.positions;
     const directions = [
       [1, 1], [1, -1], [-1, 1], [-1, -1]
@@ -210,7 +210,9 @@ class Rules {
           this.board.cells[middleI][middleJ].checker &&
           this.board.cells[middleI][middleJ].checker.color !== checker.color &&
           !this.board.cells[newI][newJ].checker) {
-        possibleAttacks.push([newI, newJ]);
+        if(state === "noClick") possibleAttacks.push([i,j]);    
+        else if(state === "firstClick") possibleAttacks.push([newI, newJ]);
+        else if(state === "secondClick") possibleAttacks.push([middleI, middleJ]);
       }
     }
     //console.log(possibleAttacks);
@@ -251,6 +253,74 @@ class User {
     this.rules = rules;
   }
 
+  beat(state, checker){
+    let underAttack = [];
+    //underAttack.push([3,2]);
+
+    switch (state) {
+      case this.clickStates.noClick:
+        for(let checker of this.whiteCheckers){
+          let move = this.rules.getPossibleAttacks(checker, this.currentState);
+          //console.log(move);
+          if(move) underAttack = underAttack.concat(move);
+        }    
+        // console.log(underAttack);
+        if(underAttack.length > 0) {
+          console.log('if'); 
+          this.highlight(underAttack, this.clickStates.noClick);
+          return underAttack;
+        }    
+        break;
+      case this.clickStates.firstClick:
+        let move = this.rules.getPossibleAttacks(checker, this.currentState);
+        //console.log(move);
+        if(move) underAttack = underAttack.concat(move);
+        // console.log(underAttack);
+        if(underAttack.length > 0) {
+          console.log('if'); 
+          this.highlight(underAttack, this.clickStates.firstClick);
+        }    
+        return underAttack;
+        break;
+      case this.clickStates.secondClick:
+        let blackPos = this.rules.getPossibleAttacks(checker, this.currentState);
+        console.log("move");
+        console.log(checker.positions);
+        console.log(blackPos);
+
+        // if (blackPos.length > 1) {
+        //   blackPos.slice(1, blackPos.length)
+        // }
+        let blackPosCh = checker;
+        blackPosCh.positions = blackPos;
+        console.log(blackPosCh);
+        // let field, fieldDesired, checker;
+        // let pos;
+        // for (let i = 0; i < this.rules.board.cells.length; i++) {
+        //   for (let j = 0; j < this.rules.board.cells.length; j++) {
+        //     if (currentChecker === this.rules.board.cells[i][j].checker) {
+        //       this.rules.board.cells[i][j].checker = false;
+        //       field = document.getElementById(`field_${i}_${j}`);
+        //       checker = document.getElementById(`checker_${i}_${j}`);
+        //       field.removeChild(checker);
+        //     }
+        //     if (i === clickPositions[0] && j === clickPositions[1]) {
+        //       this.rules.board.cells[i][j].checker = desiredChecker;
+        //       fieldDesired = document.getElementById(`field_${i}_${j}`);
+        //       pos = [i,j];
+        //     }
+        //   }
+        // }
+        // checker.id = `checker_${pos[0]}_${pos[1]}`;
+        // fieldDesired.appendChild(checker);
+    
+
+        break;
+      default:
+        break;
+    }    
+  }
+
   move() {
     // this.currentState = this.clickStates.noClick;
     // this.whiteCheckers.splice(5,2);
@@ -265,85 +335,61 @@ class User {
       this.currentState
       );
       let availableMove2;
-      let index;
+      let currentChecker;
       // console.log(availableMove);
       this.highlight(availableMove, this.currentState);
-
+      let availableMoveAttack = this.beat(this.currentState);
+      if(availableMoveAttack){
+        availableMove = availableMoveAttack;
+      }
       const handleClick = (event) => {
         let target = event.target;
-        let checkType = convert(target, "index");
-        if (!checkType) return;
+        let clickPositions = convert(target, "index");
+        if (!clickPositions) return;
 
         switch (this.currentState) {
           case this.clickStates.noClick:
             let check = availableMove.some(
-              (one) => one[0] === checkType[0] && one[1] === checkType[1]
+              (one) => one[0] === clickPositions[0] && one[1] === clickPositions[1]
             );
             if (!check) return;
+
             this.currentState = this.clickStates.firstClick;
-            index = this.whiteCheckers.find(
+            currentChecker = this.whiteCheckers.find(
               (item) =>
-                item.positions[0] === checkType[0] &&
-                item.positions[1] === checkType[1]
+                item.positions[0] === clickPositions[0] &&
+                item.positions[1] === clickPositions[1]
             );
-            availableMove2 = this.rules.getAvailableMove(index, this.currentState);
+
+            if(availableMoveAttack){
+              availableMove2 = this.beat(this.currentState, currentChecker);
+              return;
+            }
+            
+            availableMove2 = this.rules.getAvailableMove(currentChecker, this.currentState);
             this.highlight(availableMove2, this.currentState);
             break;
 
           case this.clickStates.firstClick:
             let check2 = availableMove2.some(
-              (one) => one[0] === checkType[0] && one[1] === checkType[1]
+              (one) => one[0] === clickPositions[0] && one[1] === clickPositions[1]
             );
             if (!check2) return;
 
             this.currentState = this.clickStates.secondClick;
 
-            let indexDesired = index;
-            indexDesired.positions[0] = checkType[0];
-            indexDesired.positions[1] = checkType[1];
 
-            for (let i = 0; i < this.whiteCheckers.length; i++) {
-              if (index === this.whiteCheckers[i]) {
-                this.whiteCheckers[i].positions[0] = checkType[0];
-                this.whiteCheckers[i].positions[1] = checkType[1];
-              }
+        
+            if(availableMoveAttack){
+              this.beat(this.currentState, currentChecker);
             }
+            this.updateBoard(currentChecker, clickPositions);
 
-            let field, fieldDesired, checker;
-            let pos;
-            for (let i = 0; i < this.rules.board.cells.length; i++) {
-              for (let j = 0; j < this.rules.board.cells.length; j++) {
-                if (index === this.rules.board.cells[i][j].checker) {
-                  this.rules.board.cells[i][j].checker = false;
-                  field = document.getElementById(`field_${i}_${j}`);
-                  checker = document.getElementById(`checker_${i}_${j}`);
-                  field.removeChild(checker);
-                }
-                if (i === checkType[0] && j === checkType[1]) {
-                  this.rules.board.cells[i][j].checker = indexDesired;
-                  fieldDesired = document.getElementById(`field_${i}_${j}`);
-                  pos = [i,j];
-                }
-              }
-            }
-            checker.id = `checker_${pos[0]}_${pos[1]}`;
-            fieldDesired.appendChild(checker);
-
-            this.highlight(availableMove, this.clickStates.noClick);
+            // console.log(`clickState: ${this.currentState}`);
+            // this.highlight(availableMove, this.clickStates.noClick);
             this.currentState = this.clickStates.noClick;
 
-            let underAttack = [];
-            for(checker of this.whiteCheckers){
-              let move = this.rules.getPossibleAttacks(checker);
-              console.log(move);
-              if(move) underAttack = underAttack.concat(move);
-            }
-            underAttack.push([3,2]);
-            console.log(underAttack);
-            if(underAttack.length > 0) {
-              console.log('if'); 
-              this.highlight(underAttack, this.clickStates.noClick);
-            }
+            // this.currentState = this.clickStates.noClick;
 
             fields.removeEventListener("click", handleClick);
             resolve(this.rules.board);
@@ -358,8 +404,39 @@ class User {
     })
   }
 
-  updateBoard(){
+  updateBoard(currentChecker, clickPositions){
+    let desiredChecker = currentChecker;
+    // console.log(currentChecker.positions);
+    desiredChecker.positions[0] = clickPositions[0];
+    desiredChecker.positions[1] = clickPositions[1];
+    // console.log(desiredChecker.positions);
 
+    for (let i = 0; i < this.whiteCheckers.length; i++) {
+      if (currentChecker === this.whiteCheckers[i]) {
+        this.whiteCheckers[i].positions[0] = clickPositions[0];
+        this.whiteCheckers[i].positions[1] = clickPositions[1];
+      }
+    }
+
+    let field, fieldDesired, checker;
+    let pos;
+    for (let i = 0; i < this.rules.board.cells.length; i++) {
+      for (let j = 0; j < this.rules.board.cells.length; j++) {
+        if (currentChecker === this.rules.board.cells[i][j].checker) {
+          this.rules.board.cells[i][j].checker = false;
+          field = document.getElementById(`field_${i}_${j}`);
+          checker = document.getElementById(`checker_${i}_${j}`);
+          field.removeChild(checker);
+        }
+        if (i === clickPositions[0] && j === clickPositions[1]) {
+          this.rules.board.cells[i][j].checker = desiredChecker;
+          fieldDesired = document.getElementById(`field_${i}_${j}`);
+          pos = [i,j];
+        }
+      }
+    }
+    checker.id = `checker_${pos[0]}_${pos[1]}`;
+    fieldDesired.appendChild(checker);
   }
 
   highlight(moves, state) {
