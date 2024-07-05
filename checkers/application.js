@@ -12,13 +12,7 @@ class Cell {
 }
 
 // TODO
-// Проблема с синхронизацией:
-// 	шашки есть у юзера и доски(не напрямую, в доске есть клетки, в клетке шашки)
-// 	доска есть у правил и партии +-
-// Ход назад через бой
-
 // сделать смену состояний в партии для бота и игрока
-// переделать вызов .move()
 // добавить функционал для кнопки start
 
 
@@ -29,7 +23,7 @@ class Game {
   bot;
   rules;
 
-  whiteCheckerAmount
+  //whiteCheckerAmount
 
   gameState = {
     user: 'user',
@@ -37,7 +31,7 @@ class Game {
   }
   currentState = this.gameState.user;
   startGame() {
-    this.generateHTML()
+    this.generate()
       .then(() => {
         // console.log("Игра началась");
         // const fields = document.getElementById("fields");
@@ -55,7 +49,24 @@ class Game {
   nextMove(){
     //console.log("nextMove");
     this.user.move()
-    .then((board) => {
+    .then((pos) => {
+      let desiredBlack;
+      if(pos){
+        console.log(pos);
+        desiredBlack = this.bot.blackCheckers.find(
+          (item) => 
+            item.positions[0] === pos[0] &&
+            item.positions[1] === pos[1]
+        );
+
+        for (let i = 0; i < this.bot.blackCheckers.length; i++) {
+          if(desiredBlack === this.bot.blackCheckers[i])  {
+            //console.log("succes2");
+            this.bot.blackCheckers.splice(i, 1);
+          }        
+        }
+      } 
+      // console.log(desiredBlack);
       // if (board) {
       //   // this.board = board;
       //   // this.rules.board = board;
@@ -83,7 +94,7 @@ class Game {
 
   constructor() {}
 
-  generateHTML() {
+  generate() {
     return new Promise((resolve, reject) => {
       document.addEventListener("DOMContentLoaded", () => {
         const fields = document.getElementById("fields");
@@ -186,12 +197,12 @@ class Rules {
     return moves;
   }
 
-  checkIfUnderAttack(checkers) {
-    return checkers.some(checker => {
-      const possibleMoves = this.getPossibleAttacks(checker);
-      return possibleMoves;
-    });
-  }
+  // checkIfUnderAttack(checkers) {
+  //   return checkers.some(checker => {
+  //     const possibleMoves = this.getPossibleAttacks(checker);
+  //     return possibleMoves;
+  //   });
+  // }
 
   getPossibleAttacks(checker, state) {
     const [i, j] = checker.positions;
@@ -253,9 +264,8 @@ class User {
     this.rules = rules;
   }
 
-  beat(state, checker){
+  beat(state, checker, clickPositions){
     let underAttack = [];
-    //underAttack.push([3,2]);
 
     switch (state) {
       case this.clickStates.noClick:
@@ -266,55 +276,44 @@ class User {
         }    
         // console.log(underAttack);
         if(underAttack.length > 0) {
-          console.log('if'); 
+          // console.log('if'); 
           this.highlight(underAttack, this.clickStates.noClick);
           return underAttack;
         }    
         break;
       case this.clickStates.firstClick:
         let move = this.rules.getPossibleAttacks(checker, this.currentState);
-        //console.log(move);
         if(move) underAttack = underAttack.concat(move);
-        // console.log(underAttack);
         if(underAttack.length > 0) {
-          console.log('if'); 
           this.highlight(underAttack, this.clickStates.firstClick);
         }    
         return underAttack;
         break;
       case this.clickStates.secondClick:
-        let blackPos = this.rules.getPossibleAttacks(checker, this.currentState);
-        console.log("move");
-        console.log(checker.positions);
-        console.log(blackPos);
+        const averagePos = [(clickPositions[0] + checker.positions[0]) / 2, (clickPositions[1] + checker.positions[1]) / 2];
+        console.log("Черная шашка находится в: \n");
+        // console.log(averagePos);
 
-        // if (blackPos.length > 1) {
-        //   blackPos.slice(1, blackPos.length)
-        // }
-        let blackPosCh = checker;
-        blackPosCh.positions = blackPos;
-        console.log(blackPosCh);
-        // let field, fieldDesired, checker;
-        // let pos;
-        // for (let i = 0; i < this.rules.board.cells.length; i++) {
-        //   for (let j = 0; j < this.rules.board.cells.length; j++) {
-        //     if (currentChecker === this.rules.board.cells[i][j].checker) {
-        //       this.rules.board.cells[i][j].checker = false;
-        //       field = document.getElementById(`field_${i}_${j}`);
-        //       checker = document.getElementById(`checker_${i}_${j}`);
-        //       field.removeChild(checker);
-        //     }
-        //     if (i === clickPositions[0] && j === clickPositions[1]) {
-        //       this.rules.board.cells[i][j].checker = desiredChecker;
-        //       fieldDesired = document.getElementById(`field_${i}_${j}`);
-        //       pos = [i,j];
-        //     }
-        //   }
-        // }
-        // checker.id = `checker_${pos[0]}_${pos[1]}`;
-        // fieldDesired.appendChild(checker);
-    
-
+        let field, checker2;
+        const currentBlackChecker = new CommonChecker("black", averagePos);
+        // console.log(currentBlackChecker.positions);
+        // console.log(this.rules.board.cells[averagePos[0]][averagePos[1]].checker.positions);
+        for (let i = 0; i < this.rules.board.cells.length; i++) {
+          for (let j = 0; j < this.rules.board.cells.length; j++) {
+            if (this.rules.board.cells[i][j].checker &&
+              currentBlackChecker.positions[0] === this.rules.board.cells[i][j].checker.positions[0] &&
+              currentBlackChecker.positions[1] === this.rules.board.cells[i][j].checker.positions[1] 
+            ) {
+              // console.log("Succes");
+              this.rules.board.cells[i][j].checker = false;
+              field = document.getElementById(`field_${i}_${j}`);
+              checker2 = document.getElementById(`checker_${i}_${j}`);
+              field.removeChild(checker2);
+              
+            }
+          }
+        }
+        return averagePos;
         break;
       default:
         break;
@@ -379,20 +378,18 @@ class User {
             this.currentState = this.clickStates.secondClick;
 
 
-        
+            let blackCheckerPosition;
             if(availableMoveAttack){
-              this.beat(this.currentState, currentChecker);
+              blackCheckerPosition = this.beat(this.currentState, currentChecker, clickPositions);
             }
             this.updateBoard(currentChecker, clickPositions);
 
-            // console.log(`clickState: ${this.currentState}`);
             // this.highlight(availableMove, this.clickStates.noClick);
             this.currentState = this.clickStates.noClick;
 
-            // this.currentState = this.clickStates.noClick;
-
             fields.removeEventListener("click", handleClick);
-            resolve(this.rules.board);
+            // setTimeout(() => resolve(blackCheckerPosition), 1000);
+            resolve(blackCheckerPosition);
             break;
           default:
             break;
@@ -406,10 +403,8 @@ class User {
 
   updateBoard(currentChecker, clickPositions){
     let desiredChecker = currentChecker;
-    // console.log(currentChecker.positions);
     desiredChecker.positions[0] = clickPositions[0];
     desiredChecker.positions[1] = clickPositions[1];
-    // console.log(desiredChecker.positions);
 
     for (let i = 0; i < this.whiteCheckers.length; i++) {
       if (currentChecker === this.whiteCheckers[i]) {
@@ -458,6 +453,7 @@ class User {
           elem.style.backgroundColor = "aqua";
         }
         break;
+      // Проверить необходимость второго кейса
       case this.clickStates.firstClick:
 				let fieldss;
         for (let i = 0; i < moves.length; i++) {
@@ -480,35 +476,27 @@ class Bot {
   }
 
   move() {
-    const availableMoves = this.rules.getAvailableMove(
-      this.blackCheckers,
-      "noClick"
-    );
-
+    const availableMoves = this.rules.getAvailableMove(this.blackCheckers,"noClick");
     const randomMoveIndex = Math.floor(Math.random() * availableMoves.length);
-    const [checkerX, checkerY] = availableMoves[randomMoveIndex];
+    const [i, j] = availableMoves[randomMoveIndex];
 
     const checker = this.blackCheckers.find(
-      (c) => c.positions[0] === checkerX && c.positions[1] === checkerY
+      (c) => c.positions[0] === i && c.positions[1] === j
     );
 
     const moves = this.rules.getAvailableMove_FirstClick(checker, 1);
+    const [newI, newJ] = moves[Math.floor(Math.random() * moves.length)];
 
-    const [newX, newY] = moves[Math.floor(Math.random() * moves.length)];
+    checker.positions = [newI, newJ];
+    this.rules.board.cells[i][j].checker = false;
+    this.rules.board.cells[newI][newJ].checker = checker;
 
-    checker.positions = [newX, newY];
-
-    this.rules.board.cells[checkerX][checkerY].checker = false;
-    this.rules.board.cells[newX][newY].checker = checker;
-
-    const oldField = document.getElementById(`field_${checkerX}_${checkerY}`);
-    const checkerElement = document.getElementById(
-      `checker_${checkerX}_${checkerY}`
-    );
+    const oldField = document.getElementById(`field_${i}_${j}`);
+    const checkerElement = document.getElementById(`checker_${i}_${j}`);
     oldField.removeChild(checkerElement);
 
-    const newField = document.getElementById(`field_${newX}_${newY}`);
-    checkerElement.id = `checker_${newX}_${newY}`;
+    const newField = document.getElementById(`field_${newI}_${newJ}`);
+    checkerElement.id = `checker_${newI}_${newJ}`;
     newField.appendChild(checkerElement);
 
   }
@@ -541,17 +529,6 @@ function convert(target, option) {
     //board[i][j] = "X";
   }
 }
-
-const fieldsHandler = (event) => {
-  let target = event.target;
-  console.log(target.id);
-  // target.style.backgroundColor = "yellow";
-  const index = convert(target);
-  if (index) {
-    const [i, j] = index;
-    console.log(`i: ${i} j: ${j}`);
-  } else console.log("не шашка");
-};
 
 const game = new Game();
 game.startGame();

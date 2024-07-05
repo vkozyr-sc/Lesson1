@@ -20,6 +20,7 @@ body{
     background-color: #86021c; /*86021c  #5f97ff*/
     border-radius: 3px;
     cursor: pointer;
+    display: none;
 }
 
 
@@ -33,6 +34,7 @@ body{
     width: 38%;
     height: calc(100hv - 4px);
     border: 2px solid #B5838D;
+    display: none;
 }
 
 .fields {
