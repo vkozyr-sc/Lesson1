@@ -45,46 +45,42 @@ class Game {
         console.error("Ошибка при инициализации игры:", error);
       });
   }
-
+  
   nextMove(){
     //console.log("nextMove");
     this.user.move()
     .then((pos) => {
       let desiredBlack;
-      if(pos){
+      if (pos) {
         console.log(pos);
         desiredBlack = this.bot.blackCheckers.find(
-          (item) => 
-            item.positions[0] === pos[0] &&
-            item.positions[1] === pos[1]
+          (item) => item.positions[0] === pos[0] && item.positions[1] === pos[1]
         );
 
         for (let i = 0; i < this.bot.blackCheckers.length; i++) {
-          if(desiredBlack === this.bot.blackCheckers[i])  {
+          if (desiredBlack === this.bot.blackCheckers[i]) {
             //console.log("succes2");
             this.bot.blackCheckers.splice(i, 1);
-          }        
+          }
         }
-      } 
-      // console.log(desiredBlack);
-      // if (board) {
-      //   // this.board = board;
-      //   // this.rules.board = board;
-      //   // this.bot.rules.board = board;
-      // }
-      //console.log(game);
-      this.bot.move();
-      // .then((board) => {
-      //   if (board) {
-      //     this.board = board;
-      //     this.rules.board = board;
-      //     this.user.rules.board = board;
-      //   }
-      //   this.nextMove();
-      // })
-      // .catch((error) => {
-      //   console.error("Ошибка во время хода бота:", error);
-      // });
+      }
+
+      let whitePos = this.bot.move();
+      if(whitePos){
+        let desiredWhite;
+        console.log(whitePos);
+        desiredWhite = this.user.whiteCheckers.find(
+          (item) => item.positions[0] === whitePos[0] && item.positions[1] === whitePos[1]
+        );
+  
+        for (let i = 0; i < this.user.whiteCheckers.length; i++) {
+          if (desiredWhite === this.user.whiteCheckers[i]) {
+            //console.log("succes2");
+            this.rules.board.cells[whitePos[0]][whitePos[1]].checker = false;
+            this.user.whiteCheckers.splice(i, 1);
+          }
+        }  
+      }
       this.nextMove();
     })
     .catch((error) => {
@@ -321,12 +317,6 @@ class User {
   }
 
   move() {
-    // this.currentState = this.clickStates.noClick;
-    // this.whiteCheckers.splice(5,2);
-    // console.log(this.whiteCheckers);
-    // return new Promise((resolve, reject) => {
-      
-    // });
     return new Promise((resolve) => {
       const fields = document.getElementById("fields");
       let availableMove = this.rules.getAvailableMove(
@@ -384,11 +374,9 @@ class User {
             }
             this.updateBoard(currentChecker, clickPositions);
 
-            // this.highlight(availableMove, this.clickStates.noClick);
             this.currentState = this.clickStates.noClick;
 
             fields.removeEventListener("click", handleClick);
-            // setTimeout(() => resolve(blackCheckerPosition), 1000);
             resolve(blackCheckerPosition);
             break;
           default:
@@ -405,7 +393,7 @@ class User {
     let desiredChecker = currentChecker;
     desiredChecker.positions[0] = clickPositions[0];
     desiredChecker.positions[1] = clickPositions[1];
-
+    
     for (let i = 0; i < this.whiteCheckers.length; i++) {
       if (currentChecker === this.whiteCheckers[i]) {
         this.whiteCheckers[i].positions[0] = clickPositions[0];
@@ -470,13 +458,107 @@ class User {
 }
 
 class Bot {
+  clickStates = {
+    noClick: "noClick",
+    firstClick: "firstClick",
+    secondClick: "secondClick",
+  };
+  currentState = this.clickStates.noClick;
+
+
   constructor(blackCheckers, rules) {
     this.blackCheckers = blackCheckers;
     this.rules = rules;
   }
+  
+  beat(underAttack){
+    const randomMoveIndex = Math.floor(Math.random() * underAttack.length);
+    const [i,j] = underAttack[randomMoveIndex];
+    const checker = this.blackCheckers.find(
+      (c) => c.positions[0] === i && c.positions[1] === j
+    );
+
+    const getPossibleAttack = this.rules.getPossibleAttacks(checker, "firstClick");
+    const randomPossibleAttackIndex = Math.floor(Math.random() * getPossibleAttack.length);
+    const [newI, newJ] = getPossibleAttack[randomPossibleAttackIndex];
+
+    const defeatedWhiteChecker = [(i + newI) / 2, (j + newJ) / 2];
+
+    checker.positions = [newI, newJ];
+    console.log(checker);
+    this.rules.board.cells[i][j].checker = false;
+    this.rules.board.cells[newI][newJ].checker = checker;
+
+    const oldField = document.getElementById(`field_${i}_${j}`);
+    const checkerElement = document.getElementById(`checker_${i}_${j}`);
+    oldField.removeChild(checkerElement);
+
+    const newField = document.getElementById(`field_${newI}_${newJ}`);
+    checkerElement.id = `checker_${newI}_${newJ}`;
+    newField.appendChild(checkerElement);
+
+    const whiteElem = document.getElementById(`checker_${defeatedWhiteChecker[0]}_${defeatedWhiteChecker[1]}`);
+    const whiteField = document.getElementById(`field_${defeatedWhiteChecker[0]}_${defeatedWhiteChecker[1]}`)
+    whiteField.removeChild(whiteElem);
+    
+    return defeatedWhiteChecker;
+  }
+
+  beatRec(i,j){
+    const checker = this.blackCheckers.find(
+      (c) => c.positions[0] === i && c.positions[1] === j
+    );
+
+    const getPossibleAttack = this.rules.getPossibleAttacks(checker, "firstClick");
+    const randomPossibleAttackIndex = Math.floor(Math.random() * getPossibleAttack.length);
+    const [newI, newJ] = getPossibleAttack[randomPossibleAttackIndex];
+
+    const defeatedWhiteChecker = [(i + newI) / 2, (j + newJ) / 2];
+
+    checker.positions = [newI, newJ];
+    console.log(checker);
+    this.rules.board.cells[i][j].checker = false;
+    this.rules.board.cells[newI][newJ].checker = checker;
+
+    const oldField = document.getElementById(`field_${i}_${j}`);
+    const checkerElement = document.getElementById(`checker_${i}_${j}`);
+    oldField.removeChild(checkerElement);
+
+    const newField = document.getElementById(`field_${newI}_${newJ}`);
+    checkerElement.id = `checker_${newI}_${newJ}`;
+    newField.appendChild(checkerElement);
+
+    const whiteElem = document.getElementById(`checker_${defeatedWhiteChecker[0]}_${defeatedWhiteChecker[1]}`);
+    const whiteField = document.getElementById(`field_${defeatedWhiteChecker[0]}_${defeatedWhiteChecker[1]}`)
+    whiteField.removeChild(whiteElem);
+
+    let check = this.rules.getPossibleAttacks(checker, "firstClick");
+    console.log(checker);
+    if(check){
+      return this.beatRec(newI, newJ);
+    }
+    else return defeatedWhiteChecker;
+  }
 
   move() {
-    const availableMoves = this.rules.getAvailableMove(this.blackCheckers,"noClick");
+    // let checkAttack = false;
+    // for(let state in this.clickStates){
+    //   let underAttack = this.rules.getPossibleAttacks(this.blackCheckers, state);
+    //   if(underAttack) checkAttack = true;
+    // }
+    //let underAttack = this.rules.getPossibleAttacks(this.blackCheckers, "noClick");
+    let underAttack = [];
+    for(let checker of this.blackCheckers){
+      let move = this.rules.getPossibleAttacks(checker, "noClick");
+      if(move) underAttack = underAttack.concat(move);
+    }
+    
+    if(underAttack.length > 0){
+      let whitePos = this.beat(underAttack);
+      return whitePos;
+    }
+    console.log("move");
+    const availableMoves = this.rules.getAvailableMove(this.blackCheckers, "noClick");
     const randomMoveIndex = Math.floor(Math.random() * availableMoves.length);
     const [i, j] = availableMoves[randomMoveIndex];
 

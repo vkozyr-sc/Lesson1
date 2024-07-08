@@ -73,4 +73,5 @@ body{
     background-color: red;
     border-radius: 50px;
     cursor: pointer;
+    transition: 1s all
 }
