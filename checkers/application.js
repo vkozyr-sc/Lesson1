@@ -498,7 +498,7 @@ class Bot {
     newField.appendChild(checkerElement);
 
     const whiteElem = document.getElementById(`checker_${defeatedWhiteChecker[0]}_${defeatedWhiteChecker[1]}`);
-    const whiteField = document.getElementById(`field_${defeatedWhiteChecker[0]}_${defeatedWhiteChecker[1]}`)
+    const whiteField = document.getElementById(`field_${defeatedWhiteChecker[0]}_${defeatedWhiteChecker[1]}`);
     whiteField.removeChild(whiteElem);
     
     return defeatedWhiteChecker;
