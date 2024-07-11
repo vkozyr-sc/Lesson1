@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Изучаем Vue 3</title>
+<meta charset="utf-8" />
+</head>
+<body>
+<div id="app">
+    <p>
+        <input type="text" v-model="newPhone" />
+        <button v-on:click="phones.push(newPhone)">Добавить</button>
+    </p>
+    <ul>
+      <li v-for="(phone, index) in phones">
+        <p>{{ phone }} <button v-on:click="phones.splice(index, 1)">Удалить</button></p>
+      </li>
+    </ul>
+</div>
+<script src="https://unpkg.com/vue"></script>
+<script>
+Vue.createApp({
+  data() {
+    return { 
+        newPhone: '',
+        phones: ['iPhone 12', 'Galaxy S20', 'Nokia N9', 'Xiaomi Mi10']}
+  }
+}).mount('#app');
+</script>
+</body>
+</html>

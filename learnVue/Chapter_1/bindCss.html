@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Изучаем Vue 3</title>
+    <meta charset="utf-8" />
+    <style>
+      .region {
+        background-color: #999;
+        margin: 10px;
+        width: 75px;
+        height: 75px;
+      }
+      .bounded {
+        border: 2px solid black;
+      }
+      .yellow {
+        background-color: yellow;
+      }
+      .red {
+        background-color: red;
+      }
+      .blue {
+        background-color: blue;
+      }
+      .green {
+        background-color: green;
+      }
+      .big {
+        width: 100px;
+        height: 100px;
+      }
+      .small {
+        width: 50px;
+        height: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div
+        class="region"
+        v-bind:class="[color, {bounded: isBounded}, size]"
+        v-on:click="isBounded=!isBounded"
+      ></div>
+      <br />
+      <input type="text" v-model="color" />
+      <br />
+      <input type="text" v-model="size" />
+    </div>
+    <script src="https://unpkg.com/vue"></script>
+    <script>
+      Vue.createApp({
+        data() {
+          return {
+            color: "red",
+            size: "small",
+            isBounded: false,
+          };
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>

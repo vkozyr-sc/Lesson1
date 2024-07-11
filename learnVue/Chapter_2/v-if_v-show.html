@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Изучаем Vue 3</title>
+<meta charset="utf-8" />
+</head>
+<body>
+<div id="app">
+    <template v-if="visible">
+        <h1>Заголовок 1</h1>
+        <p>Параграф 1</p>
+    </template>
+    <template v-else>
+        <h1>Заголовок 2</h1>
+        <p>Параграф 2</p>
+    </template>
+    <button v-on:click="visible=!visible">{{visible?'К параграфу 2':'К параграфу 1'}}</button>
+</div>
+<script src="https://unpkg.com/vue"></script>
+<script>
+Vue.createApp({
+  data() {
+    return { visible: true }
+  }
+}).mount('#app');
+</script>
+</body>
+</html>
