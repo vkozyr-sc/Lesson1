@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Изучаем Vue 3</title>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+</head>
+<body>
+<div id="app" class="col-md-4">
+    <label>Логин</label>
+    <input type="text" v-model="login" placeholder="Введите логин" class="form-control" /><br>
+    <label>Пароль</label>
+    <input type="password" v-model="password" placeholder="Введите пароль" class="form-control" /><br>
+    <label>Возраст</label>
+    <input type="number" v-model="age" min="18" placeholder="Введите возраст" class="form-control" /><br>
+    <label>Дата регистрации</label><br>
+    <input type="date" v-model="date" placeholder="Введите дату" class="form-control" />
+    <br>
+    <div>
+        <h3>Введенная информация</h3>
+        <p>Логин: {{login}}</p>
+        <p>Пароль: {{password}}</p>
+        <p>Возраст: {{age}}</p>
+        <p>Дата регистрации: {{date}}</p>
+    </div>
+</div>
+<script src="https://unpkg.com/vue"></script>
+<script>
+Vue.createApp({
+  data() {
+    return { 
+        login:'',
+        password:'',
+        date: '',
+        age: 22
+    }
+  }
+}).mount('#app');
+</script>
+</body>
+</html>

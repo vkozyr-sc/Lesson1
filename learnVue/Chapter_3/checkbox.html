@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Изучаем Vue 3</title>
+<meta charset="utf-8" />
+</head>
+<body>
+<div id="app">
+    <template v-for="user in users">
+        <input type="checkbox" v-bind:value="user" v-model="selectedUsers">
+        <label>{{user.name}}</label><br>
+    </template>
+      
+    <ul>
+        <li v-for="user in selectedUsers">{{user.name}} - {{user.age}}</li>
+    </ul>
+</div>
+<script src="https://unpkg.com/vue"></script>
+<script>
+Vue.createApp({
+  data() {
+    return { 
+        users:[
+                {name:'Tom', age:22},
+                {name:'Bob', age:25},
+                {name:'Sam', age:28},
+                {name:'Alice', age:26}
+            ],
+        selectedUsers:[]
+    }
+  }
+}).mount('#app');
+</script>
+</body>
+</html>
