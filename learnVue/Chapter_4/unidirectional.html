@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Компоненты Vue 3</title>
+<meta charset="utf-8" />
+</head>
+<body>
+<div id="app">
+    <div><h3>Vue App</h3><input type="text" v-model="name" /><p>Hello {{name}}</p></div>
+    <user-edit :user="name"></useredit>
+</div>
+<script src="https://unpkg.com/vue"></script>
+<script>
+const app = Vue.createApp({
+    data(){
+        return {  name: 'Tom' }
+    }
+});
+  
+app.component('user-edit', {
+    props: ["user"],
+    data() {
+      return { userName: this.user}
+    },
+    watch: { 
+        user(newVal) {
+          this.userName = newVal;
+        }
+    },
+    template: '<div><h3>Component</h3><input type="text" v-model="userName" /><p>User name: {{userName}}</p></div>'
+});
+app.mount('#app');
+</script>
+</body>
+</html>
