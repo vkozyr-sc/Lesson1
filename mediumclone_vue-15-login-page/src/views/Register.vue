@@ -9,13 +9,17 @@
               Need an account?
             </router-link>
           </p>
-          VALIDATION ERRORS
+          <mcv-validation-errors
+            v-if="validationErrors"
+            :validation-errors="validationErrors"
+          ></mcv-validation-errors>
           <form @submit.prevent="onSubmit">
             <fieldset class="form-group">
               <input
                 class="form-control form-control-lg"
                 type="text"
                 placeholder="Username"
+                v-model="username"
               />
             </fieldset>
             <fieldset class="form-group">
@@ -23,6 +27,7 @@
                 class="form-control form-control-lg"
                 type="text"
                 placeholder="Email"
+                v-model="email"
               />
             </fieldset>
             <fieldset class="form-group">
@@ -30,6 +35,7 @@
                 class="form-control form-control-lg"
                 type="password"
                 placeholder="Password"
+                v-model="password"
               />
             </fieldset>
             <button
@@ -46,23 +52,38 @@
 </template>
 
 <script>
+import {mapState} from 'vuex'
+
+import McvValidationErrors from '@/components/ValidationErrors.vue'
+import {actionTypes} from '@/store/modules/auth'
 export default {
   name: 'McvRegister',
-  computed: {
-    isSubmitting() {
-      return this.$store.state.auth.isSubmitting
+  components: {
+    McvValidationErrors
+  },
+  data() {
+    return {
+      email: '',
+      password: '',
+      username: ''
     }
+  },
+  computed: {
+    ...mapState({
+      isSubmitting: state => state.auth.isSubmitting,
+      validationErrors: state => state.auth.validationErrors
+    })
   },
   methods: {
     onSubmit() {
       this.$store
-        .dispatch('register', {
-          email: 'sdgffass@dad.com',
-          username: 'fgfgfgfdd',
-          password: 'sasggfs'
+        .dispatch(actionTypes.register, {
+          email: this.email,
+          username: this.username,
+          password: this.password
         })
-        .then(result => {
-          console.log('result from register action', result)
+        .then(() => {
+          this.$router.push({name: 'home'})
         })
     }
   }

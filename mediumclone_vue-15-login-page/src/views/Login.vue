@@ -3,26 +3,23 @@
     <div class="container page">
       <div class="row">
         <div class="col-md-6 offset-md-3 col-xs-12">
-          <h1 class="text-xs-center">Sign up</h1>
+          <h1 class="text-xs-center">Sign in</h1>
           <p class="text-xs-center">
-            <router-link :to="{name: 'login'}">
-              Need an account?
+            <router-link :to="{name: 'register'}">
+              Have an account?
             </router-link>
           </p>
-          VALIDATION ERRORS
+          <mcv-validation-errors
+            v-if="validationErrors"
+            :validation-errors="validationErrors"
+          ></mcv-validation-errors>
           <form @submit.prevent="onSubmit">
             <fieldset class="form-group">
               <input
                 class="form-control form-control-lg"
                 type="text"
-                placeholder="Username"
-              />
-            </fieldset>
-            <fieldset class="form-group">
-              <input
-                class="form-control form-control-lg"
-                type="text"
                 placeholder="Email"
+                v-model="email"
               />
             </fieldset>
             <fieldset class="form-group">
@@ -30,13 +27,14 @@
                 class="form-control form-control-lg"
                 type="password"
                 placeholder="Password"
+                v-model="password"
               />
             </fieldset>
             <button
               class="btn btn-lg btn-primary pull-xs-right"
               :disabled="isSubmitting"
             >
-              Sign Up
+              Sign In
             </button>
           </form>
         </div>
@@ -46,23 +44,37 @@
 </template>
 
 <script>
+import {mapState} from 'vuex'
+
+import McvValidationErrors from '@/components/ValidationErrors.vue'
+import {actionTypes} from '@/store/modules/auth'
+
 export default {
-  name: 'McvRegister',
-  computed: {
-    isSubmitting() {
-      return this.$store.state.auth.isSubmitting
+  name: 'McvLogin',
+  components: {
+    McvValidationErrors
+  },
+  data() {
+    return {
+      email: '',
+      password: ''
     }
+  },
+  computed: {
+    ...mapState({
+      isSubmitting: state => state.auth.isSubmitting,
+      validationErrors: state => state.auth.validationErrors
+    })
   },
   methods: {
     onSubmit() {
       this.$store
-        .dispatch('register', {
-          email: 'sdgffass@dad.com',
-          username: 'fgfgfgfdd',
-          password: 'sasggfs'
+        .dispatch(actionTypes.login, {
+          email: this.email,
+          password: this.password
         })
-        .then(result => {
-          console.log('result from register action', result)
+        .then(() => {
+          this.$router.push({name: 'home'})
         })
     }
   }
