@@ -1,4 +1,4 @@
-<template>
+<template v-if="isLoggedIn">
   <div class="home-page">
     BANNER
     <div class="container page">
@@ -16,6 +16,9 @@
 
 <script>
 import McvFeed from '@/components/Feed.vue'
+import {mapGetters} from 'vuex'
+import {getterTypes} from '@/store/modules/auth'
+
 export default {
   name: 'McvGlobalFeed',
   components: {
@@ -25,6 +28,14 @@ export default {
     return {
       apiUrl: '/articles'
     }
+  },
+  computed: {
+    ...mapGetters({
+      currentUser: getterTypes.currentUser,
+      isLoggedIn: getterTypes.isLoggedIn,
+      isAnonymous: getterTypes.isAnonymous
+    })
   }
+
 }
 </script>

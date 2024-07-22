@@ -6,7 +6,7 @@
           <h1 class="text-xs-center">Sign in</h1>
           <p class="text-xs-center">
             <router-link :to="{name: 'register'}">
-              Have an account?
+              Need an account?
             </router-link>
           </p>
           <mcv-validation-errors
