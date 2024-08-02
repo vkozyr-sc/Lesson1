@@ -1,7 +1,7 @@
 <!-- Game.vue -->
 <template>
   <div>
-    <button class="btn" @click="startGame">Start</button>
+    <button @click="startGame">Start</button>
     <Board v-if="cells.length" :cells="cells" @cellClick="handleCellClick" />
   </div>
 </template>
@@ -39,18 +39,16 @@ export default {
 
     const handleCellClick = (position) => {
       console.log("Cell clicked:", position);
+      // Обработка кликов по ячейкам
     };
 
     return { cells, startGame, handleCellClick };
-  }
+  },
 };
 </script>
 
 <style>
-.btn {
+button {
   margin-bottom: 20px;
-}
-.active {
-  display: none;
 }
 </style>
