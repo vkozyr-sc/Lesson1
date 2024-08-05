@@ -49,8 +49,8 @@ export default {
     },
     selectChecker(index) {
       if (
-        this.board[index].hasChecker &&
-        this.board[index].checkerColor === "white-checker"
+        this.board[index].hasChecker 
+        //&& this.board[index].checkerColor === "white-checker"
       ) {
         this.selectedChecker = index;
         console.log(this.selectedChecker);
@@ -74,7 +74,7 @@ export default {
         this.board[this.selectedChecker].hasChecker = false;
         this.board[this.selectedChecker].checkerColor = null;
 
-        if (
+        if ( 
           Math.abs(
             Math.floor(index / 8) - Math.floor(this.selectedChecker / 8)
           ) === 2
@@ -87,11 +87,11 @@ export default {
         this.selectedChecker = null;
         this.validMoves = [];
 
+        this.currentPlayer =
+          this.currentPlayer === "white-checker"
+            ? "black-checker"
+            : "white-checker";
         this.botMove();
-        // this.currentPlayer =
-        //   this.currentPlayer === "white-checker"
-        //     ? "black-checker"
-        //     : "white-checker";
       }
     },
     getValidMoves(index) {
@@ -144,20 +144,29 @@ export default {
       return this.validMoves.includes(index);
     },
     botMove(){
-      let blackCheckers = [];
+      const blackCheckers = [];
       for (let i = 0; i < this.board.length; i++) {
         if(this.board[i].checkerColor === "black-checker" && this.board[i].hasChecker) blackCheckers.push(this.board[i]);  
-        // console.log(this.board[i].id);      
       }
+      console.log("бот сделал ход");
+      const validCheckers = [];
+      console.log(blackCheckers);
+      for (let i = 0; i < blackCheckers.length; i++) {
+        if(this.getValidMoves(blackCheckers[i].index).length > 0){
+          validCheckers.push(this.getValidMoves(blackCheckers[i].index));    
+        }
+      }
+      console.log(validCheckers);
+      // console.log(blackCheckers);
       // blackCheckers[1].hasChecker = false;
       // blackCheckers[1].checkerColor = null;
     }
   },
-  // mounted() {
-  //   if (this.currentPlayer === "black-checker") {
-  //     this.makeAIMove();
-  //   }
-  // },
+  mounted() {
+    if (this.currentPlayer === "black-checker") {
+      this.makeAIMove();
+    }
+  },
 };
 </script>
 
