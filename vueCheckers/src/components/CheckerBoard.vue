@@ -153,20 +153,26 @@ export default {
       console.log(blackCheckers);
       for (let i = 0; i < blackCheckers.length; i++) {
         if(this.getValidMoves(blackCheckers[i].index).length > 0){
-          validCheckers.push(this.getValidMoves(blackCheckers[i].index));    
+          validCheckers.push([blackCheckers[i].index, this.getValidMoves(blackCheckers[i].index)]); 
         }
       }
       console.log(validCheckers);
-      // console.log(blackCheckers);
-      // blackCheckers[1].hasChecker = false;
-      // blackCheckers[1].checkerColor = null;
+      
+      const randomBlackCheckerIndex = Math.floor(Math.random() * validCheckers.length);
+      const randBlackChecker = validCheckers[randomBlackCheckerIndex];
+      console.log("rand checker index: " + validCheckers[3]);
+      const randomBotMoveIndex = Math.floor(Math.random() * randBlackChecker[1].length);
+      const randMove = randBlackChecker[1][randomBotMoveIndex];
+      console.log(`rand checker: ${randBlackChecker}, rand move: ${randMove}`);
+      randBlackChecker = randBlackChecker.splice(0, 1);
+      console.log(randBlackChecker);
     }
   },
-  mounted() {
-    if (this.currentPlayer === "black-checker") {
-      this.makeAIMove();
-    }
-  },
+  // mounted() {
+  //   if (this.currentPlayer === "black-checker") {
+  //     this.makeAIMove();
+  //   }
+  // },
 };
 </script>
 
