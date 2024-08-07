@@ -30,12 +30,13 @@ export default {
       selectedChecker: null,
       currentPlayer: "white-checker",
       validMoves: [],
+      underAttack: [],
     };
   },
   methods: {
     initializeBoard() {
       return Array.from({ length: 64 }, (_, index) => ({
-        id: [Math.floor(index / 8),index % 8],
+        id: [Math.floor(index / 8), index % 8],
         index: index,
         color: (Math.floor(index / 8) + index) % 2 === 0 ? "white" : "black",
         hasChecker:
@@ -47,20 +48,25 @@ export default {
           index < 24 ? "black-checker" : index >= 40 ? "white-checker" : null,
       }));
     },
+
+    isUnderAttack() {
+      console.log(this.underAttack);
+      this.underAttack = [];
+      return true;
+    },
+
     selectChecker(index) {
-      if (
-        this.board[index].hasChecker 
-        //&& this.board[index].checkerColor === "white-checker"
-      ) {
+      if (this.isUnderAttack()) {
+        // this.selectedChecker = isUnderAttack();
+        // console.log(this.underAttack);
+        // return;
+      }
+      if (this.board[index].hasChecker && this.board[index].checkerColor === "white-checker") {
         this.selectedChecker = index;
         console.log(this.selectedChecker);
-        let selChecker =  this.board.find(
-          (item) => item.index === index
-        );
+        let selChecker = this.board.find((item) => item.index === index);
         selChecker.id[0] = 3;
-        console.log(selChecker.id);
 
-        // console.log(this.board);
         this.validMoves = this.getValidMoves(index);
       } else {
         this.selectedChecker = null;
@@ -70,11 +76,12 @@ export default {
     moveChecker(index) {
       if (this.selectedChecker !== null && this.validMoves.includes(index)) {
         this.board[index].hasChecker = true;
-        this.board[index].checkerColor = this.board[this.selectedChecker].checkerColor;
+        this.board[index].checkerColor =
+          this.board[this.selectedChecker].checkerColor;
         this.board[this.selectedChecker].hasChecker = false;
         this.board[this.selectedChecker].checkerColor = null;
 
-        if ( 
+        if (
           Math.abs(
             Math.floor(index / 8) - Math.floor(this.selectedChecker / 8)
           ) === 2
@@ -91,25 +98,34 @@ export default {
           this.currentPlayer === "white-checker"
             ? "black-checker"
             : "white-checker";
-        this.botMove();
+        if (this.currentPlayer === "black-checker") this.botMove();
       }
     },
     getValidMoves(index) {
       const moves = [];
       const direction =
         this.board[index].checkerColor === "white-checker" ? -1 : 1;
-      const potentialMoves = [
-        index + direction * 7,
-        index + direction * 9,
+      const potentialMoves = [index + direction * 7, index + direction * 9];
+      const potentialAttacks = [
         index + direction * 14,
         index + direction * 18,
+        index + direction * -7,
+        index + direction * -9,
       ];
-
-      potentialMoves.forEach((move) => {
+      potentialAttacks.forEach((move) => {
         if (this.isValidMove(index, move)) {
           moves.push(move);
+          this.underAttack.push(move);
         }
       });
+
+      if (moves.length <= 0) {
+        potentialMoves.forEach((move) => {
+          if (this.isValidMove(index, move)) {
+            moves.push(move);
+          }
+        });
+      }
 
       return moves;
     },
@@ -143,30 +159,54 @@ export default {
     isHighlighted(index) {
       return this.validMoves.includes(index);
     },
-    botMove(){
+    botMove() {
+      //if(this.currentPlayer = "black-checker");
       const blackCheckers = [];
       for (let i = 0; i < this.board.length; i++) {
-        if(this.board[i].checkerColor === "black-checker" && this.board[i].hasChecker) blackCheckers.push(this.board[i]);  
+        if (
+          this.board[i].checkerColor === "black-checker" &&
+          this.board[i].hasChecker
+        )
+          blackCheckers.push(this.board[i]);
       }
+      // this.blackCheckers = blackCheckers;
       console.log("бот сделал ход");
       const validCheckers = [];
-      console.log(blackCheckers);
       for (let i = 0; i < blackCheckers.length; i++) {
-        if(this.getValidMoves(blackCheckers[i].index).length > 0){
-          validCheckers.push([blackCheckers[i].index, this.getValidMoves(blackCheckers[i].index)]); 
+        if (this.getValidMoves(blackCheckers[i].index).length > 0) {
+          validCheckers.push([
+            blackCheckers[i].index,
+            this.getValidMoves(blackCheckers[i].index),
+          ]);
         }
       }
-      console.log(validCheckers);
-      
-      const randomBlackCheckerIndex = Math.floor(Math.random() * validCheckers.length);
+
+      let randomBlackChecker = 0;
+      let randomMove = 0;
+
+      [randomBlackChecker, randomMove] = this.botAI(validCheckers);
+
+      this.validMoves = [randomMove];
+      this.selectedChecker = randomBlackChecker;
+      this.moveChecker(randomMove);
+    },
+
+
+    botAI(validCheckers) {
+      const randomBlackCheckerIndex = Math.floor(
+        Math.random() * validCheckers.length
+      );
       const randBlackChecker = validCheckers[randomBlackCheckerIndex];
-      console.log("rand checker index: " + validCheckers[3]);
-      const randomBotMoveIndex = Math.floor(Math.random() * randBlackChecker[1].length);
+
+      const randomBotMoveIndex = Math.floor(
+        Math.random() * randBlackChecker[1].length
+      );
       const randMove = randBlackChecker[1][randomBotMoveIndex];
-      console.log(`rand checker: ${randBlackChecker}, rand move: ${randMove}`);
-      randBlackChecker = randBlackChecker.splice(0, 1);
-      console.log(randBlackChecker);
-    }
+
+      const newRandBlackChecker = randBlackChecker[0];
+
+      return [newRandBlackChecker, randMove];
+    },
   },
   // mounted() {
   //   if (this.currentPlayer === "black-checker") {
