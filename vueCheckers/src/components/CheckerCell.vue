@@ -53,10 +53,10 @@ export default {
 }
 
 .cell.black {
-  background-color: #808080; /* Gray color */
+  background-color: #808080; 
 }
 
 .cell.highlight {
-  background-color: yellow; /* Highlight color */
+  background-color: yellow; 
 }
 </style>

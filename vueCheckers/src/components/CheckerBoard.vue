@@ -31,6 +31,8 @@ export default {
       currentPlayer: "white-checker",
       validMoves: [],
       underAttack: [],
+      // underAttackWhite: [],
+      // underAttackBlack: [],
     };
   },
   methods: {
@@ -50,9 +52,9 @@ export default {
     },
 
     isUnderAttack() {
-      console.log(this.underAttack);
-      this.underAttack = [];
-      return true;
+      for (let i = 0; i < this.underAttack.length; i++) {
+                
+      }
     },
 
     selectChecker(index) {
