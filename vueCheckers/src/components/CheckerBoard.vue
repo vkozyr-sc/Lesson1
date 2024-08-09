@@ -30,10 +30,12 @@ export default {
       selectedChecker: null,
       currentPlayer: "white-checker",
       validMoves: [],
-      underAttack: [],
       // underAttackWhite: [],
       // underAttackBlack: [],
     };
+  },
+  updated() {
+    //console.log("update");
   },
   methods: {
     initializeBoard() {
@@ -50,20 +52,54 @@ export default {
           index < 24 ? "black-checker" : index >= 40 ? "white-checker" : null,
       }));
     },
-
+    // доделать ход черных шашек: ходить должна шашка, которая находится под атакой
     isUnderAttack() {
-      for (let i = 0; i < this.underAttack.length; i++) {
-                
+      const blackCheckers = [];
+      const whiteCheckers = [];
+
+      for (let i = 0; i < this.board.length; i++) {
+        if (this.board[i].checkerColor === "black-checker" && this.board[i].hasChecker) {
+          blackCheckers.push(this.board[i]);
+        }
+        else if (this.board[i].checkerColor === "white-checker" && this.board[i].hasChecker){
+          whiteCheckers.push(this.board[i]);
+        }
       }
+
+      const validBlackCheckers = [];
+      const validWhiteCheckers = [];
+
+      for (let i = 0; i < blackCheckers.length; i++) {
+        if (this.getValidAttacks(blackCheckers[i].index).length > 0) {
+          validBlackCheckers.push(blackCheckers[i].index);
+        }
+      }
+      for (let i = 0; i < whiteCheckers.length; i++) {
+        if (this.getValidAttacks(whiteCheckers[i].index).length > 0) {
+          //validWhiteCheckers = validWhiteCheckers.concat()
+          validWhiteCheckers.push(whiteCheckers[i].index);
+        }
+      }
+
+      console.log(validBlackCheckers);
+      console.log(validWhiteCheckers);
+      return [validBlackCheckers, validWhiteCheckers];
+
     },
 
     selectChecker(index) {
-      if (this.isUnderAttack()) {
-        // this.selectedChecker = isUnderAttack();
-        // console.log(this.underAttack);
-        // return;
+      const [validBlackCheckers, validWhiteCheckers] = this.isUnderAttack();
+
+      //let test = [index];
+      //console.log(test);
+      //console.log(validWhiteCheckers.includes(index));
+      if(validWhiteCheckers.length > 0 && !validWhiteCheckers.includes(index)){
+        //console.log("true");
+        return;
       }
-      if (this.board[index].hasChecker && this.board[index].checkerColor === "white-checker") {
+      if (this.board[index].hasChecker && this.board[index].checkerColor === "white-checker" 
+          //&& validWhiteCheckers.includes(index) && validWhiteCheckers.length > 0
+        ) {
         this.selectedChecker = index;
         console.log(this.selectedChecker);
         let selChecker = this.board.find((item) => item.index === index);
@@ -117,7 +153,6 @@ export default {
       potentialAttacks.forEach((move) => {
         if (this.isValidMove(index, move)) {
           moves.push(move);
-          this.underAttack.push(move);
         }
       });
 
@@ -131,15 +166,34 @@ export default {
 
       return moves;
     },
+
+    getValidAttacks(index) {
+      const moves = [];
+      const direction =
+        this.board[index].checkerColor === "white-checker" ? -1 : 1;
+      const potentialAttacks = [
+        index + direction * 14,
+        index + direction * 18,
+        index + direction * -7,
+        index + direction * -9,
+      ];
+      potentialAttacks.forEach((move) => {
+        if (this.isValidMove(index, move)) {
+          moves.push(move);
+        }
+      });
+
+      return moves;
+    },
+
+
     isValidMove(startIndex, endIndex) {
       if (endIndex < 0 || endIndex >= 64) return false;
       if (this.board[endIndex].hasChecker) return false;
 
       const rowDiff = Math.floor(endIndex / 8) - Math.floor(startIndex / 8);
       const colDiff = (endIndex % 8) - (startIndex % 8);
-      const direction =
-        this.board[startIndex].checkerColor === "white-checker" ? -1 : 1;
-
+      const direction = this.board[startIndex].checkerColor === "white-checker" ? -1 : 1;
       if (
         Math.abs(rowDiff) === 1 &&
         Math.abs(colDiff) === 1 &&
@@ -165,21 +219,14 @@ export default {
       //if(this.currentPlayer = "black-checker");
       const blackCheckers = [];
       for (let i = 0; i < this.board.length; i++) {
-        if (
-          this.board[i].checkerColor === "black-checker" &&
-          this.board[i].hasChecker
-        )
-          blackCheckers.push(this.board[i]);
+        if (this.board[i].checkerColor === "black-checker" && this.board[i].hasChecker) blackCheckers.push(this.board[i]);
       }
       // this.blackCheckers = blackCheckers;
       console.log("бот сделал ход");
       const validCheckers = [];
       for (let i = 0; i < blackCheckers.length; i++) {
         if (this.getValidMoves(blackCheckers[i].index).length > 0) {
-          validCheckers.push([
-            blackCheckers[i].index,
-            this.getValidMoves(blackCheckers[i].index),
-          ]);
+          validCheckers.push([blackCheckers[i].index, this.getValidMoves(blackCheckers[i].index)]);
         }
       }
 

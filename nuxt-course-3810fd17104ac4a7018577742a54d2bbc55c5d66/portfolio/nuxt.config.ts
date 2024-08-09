@@ -2,18 +2,18 @@
 export default defineNuxtConfig({
   devtools: {
     enabled: true,
-
     timeline: {
       enabled: true
     }
   },
-
+  app: {
+    pageTransition: { name: 'page', mode: 'out-in' }
+  },
   modules: [
     '@nuxtjs/tailwindcss',
     '@nuxtjs/color-mode',
     '@nuxt/content'
   ],
-
   content: {
     highlight: {
       theme: {
@@ -22,10 +22,12 @@ export default defineNuxtConfig({
       }
     }
   },
-
   colorMode: {
     classSuffix: ''
   },
-
-  compatibilityDate: '2024-08-07'
+  nitro: {
+    prerender: {
+      routes: ['/sitemap.xml']
+    }
+  }
 })
