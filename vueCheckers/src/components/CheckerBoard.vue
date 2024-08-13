@@ -14,11 +14,15 @@
         @select="selectChecker"
       />
     </div>
+    <button class="btn" @click="restartGame()">Restart</button>
+
   </div>
+  
 </template>
 
 <script>
 import CheckerCell from "./CheckerCell.vue";
+import axios from 'axios';
 
 export default {
   components: {
@@ -26,31 +30,41 @@ export default {
   },
   data() {
     return {
-      board: this.initializeBoard(),
+      board: [],
       selectedChecker: null,
       currentPlayer: "white-checker",
       validMoves: [],
+      currentMove: [],
       // underAttackWhite: [],
       // underAttackBlack: [],
     };
   },
-  updated() {
-    //console.log("update");
+  async created() {
+    await this.loadBoard();
   },
+
   methods: {
-    initializeBoard() {
-      return Array.from({ length: 64 }, (_, index) => ({
-        id: [Math.floor(index / 8), index % 8],
-        index: index,
-        color: (Math.floor(index / 8) + index) % 2 === 0 ? "white" : "black",
-        hasChecker:
-          (Math.floor(index / 8) % 2 === 0
-            ? index % 2 === 1
-            : index % 2 === 0) &&
-          (index < 24 || index >= 40),
-        checkerColor:
-          index < 24 ? "black-checker" : index >= 40 ? "white-checker" : null,
-      }));
+    async loadBoard() {
+      const response = await axios.get(`http://localhost:3000/board`);
+      this.board = response.data;
+    },
+    async restartBoard() {
+      const response = await axios.get(`http://localhost:3000/restart`);
+      this.board = response.data;
+    },
+    async saveBoard() {
+      await axios.post('http://localhost:3000/board', this.board);
+    },
+    async saveMove(){
+      await axios.post('http://localhost:3000/move', this.currentMove);
+    },
+    async restartGame(){
+      await this.restartBoard();
+      //this.selectChecker = null;
+      // this.currentPlayer = "white-checker";
+      // this.validMoves = [];
+      // this.currentMove = [];
+      // this.isUnderAttack();
     },
     // доделать ход черных шашек: ходить должна шашка, которая находится под атакой
     isUnderAttack() {
@@ -89,7 +103,7 @@ export default {
 
     selectChecker(index) {
       const [validBlackCheckers, validWhiteCheckers] = this.isUnderAttack();
-
+      console.log(this.selectedChecker);
       //let test = [index];
       //console.log(test);
       //console.log(validWhiteCheckers.includes(index));
@@ -111,7 +125,7 @@ export default {
         this.validMoves = [];
       }
     },
-    moveChecker(index) {
+    async moveChecker(index) {
       if (this.selectedChecker !== null && this.validMoves.includes(index)) {
         this.board[index].hasChecker = true;
         this.board[index].checkerColor =
@@ -124,6 +138,7 @@ export default {
             Math.floor(index / 8) - Math.floor(this.selectedChecker / 8)
           ) === 2
         ) {
+          this.currentMove.push(this.currentPlayer, this.selectChecker, index);
           const middleIndex = (index + this.selectedChecker) / 2;
           this.board[middleIndex].hasChecker = false;
           this.board[middleIndex].checkerColor = null;
@@ -131,12 +146,14 @@ export default {
 
         this.selectedChecker = null;
         this.validMoves = [];
-
+        console.log(this.currentMove);
+        
         this.currentPlayer =
           this.currentPlayer === "white-checker"
             ? "black-checker"
             : "white-checker";
         if (this.currentPlayer === "black-checker") this.botMove();
+        await this.saveBoard();
       }
     },
     getValidMoves(index) {
@@ -282,5 +299,17 @@ export default {
   padding: 10px;
   box-sizing: border-box;
   background-color: #000;
+}
+
+.btn {
+  margin-top: 15px;
+  position: relative;
+  left: 80px;
+  /* align-self:center; */
+  padding: 10px 15px;
+  background: none;
+  color: gray;
+  border: 3px solid gray;
+  font-size: larger;
 }
 </style>
