@@ -1,5 +1,6 @@
 <template>
   <div class="board-container">
+    <h3 class="curr-player">Current player: {{ currentPlayer }}</h3>
     <div class="board">
       <CheckerCell
         v-for="(cell, index) in board"
@@ -15,14 +16,12 @@
       />
     </div>
     <button class="btn" @click="restartGame()">Restart</button>
-
   </div>
-  
 </template>
 
 <script>
 import CheckerCell from "./CheckerCell.vue";
-import axios from 'axios';
+import axios from "axios";
 
 export default {
   components: {
@@ -53,17 +52,17 @@ export default {
       this.board = response.data;
     },
     async saveBoard() {
-      await axios.post('http://localhost:3000/board', this.board);
+      await axios.post("http://localhost:3000/board", this.board);
     },
-    async saveMove(){
-      await axios.post('http://localhost:3000/move', this.currentMove);
+    async saveMove() {
+      await axios.post("http://localhost:3000/move", this.currentMove);
     },
-    async restartGame(){
+    async restartGame() {
       await this.restartBoard();
-      //this.selectChecker = null;
-      // this.currentPlayer = "white-checker";
-      // this.validMoves = [];
-      // this.currentMove = [];
+      this.selectedChecker = null;
+      this.currentPlayer = "white-checker";
+      this.validMoves = [];
+      this.currentMove = [];
       // this.isUnderAttack();
     },
     // доделать ход черных шашек: ходить должна шашка, которая находится под атакой
@@ -72,10 +71,12 @@ export default {
       const whiteCheckers = [];
 
       for (let i = 0; i < this.board.length; i++) {
-        if (this.board[i].checkerColor === "black-checker" && this.board[i].hasChecker) {
+        if (this.board[i].checkerColor === "black-checker" &&this.board[i].hasChecker) {
           blackCheckers.push(this.board[i]);
-        }
-        else if (this.board[i].checkerColor === "white-checker" && this.board[i].hasChecker){
+        } else if (
+          this.board[i].checkerColor === "white-checker" &&
+          this.board[i].hasChecker
+        ) {
           whiteCheckers.push(this.board[i]);
         }
       }
@@ -98,7 +99,6 @@ export default {
       console.log(validBlackCheckers);
       console.log(validWhiteCheckers);
       return [validBlackCheckers, validWhiteCheckers];
-
     },
 
     selectChecker(index) {
@@ -107,13 +107,28 @@ export default {
       //let test = [index];
       //console.log(test);
       //console.log(validWhiteCheckers.includes(index));
-      if(validWhiteCheckers.length > 0 && !validWhiteCheckers.includes(index)){
-        //console.log("true");
-        return;
+
+      switch (this.currentPlayer) {
+        case "white-checker":
+          if (validWhiteCheckers.length > 0 &&!validWhiteCheckers.includes(index)) {
+            return;
+          }
+          break;
+        case "black-checker":
+          if (validBlackCheckers.length > 0 &&!validBlackCheckers.includes(index)) {
+            return;
+          }
+          break;
+        default:
+          break;
       }
-      if (this.board[index].hasChecker && this.board[index].checkerColor === "white-checker" 
-          //&& validWhiteCheckers.includes(index) && validWhiteCheckers.length > 0
-        ) {
+
+      if (
+        this.board[index].hasChecker &&
+        this.board[index].checkerColor === this.currentPlayer
+        // && this.board[index].checkerColor === "white-checker"
+        //&& validWhiteCheckers.includes(index) && validWhiteCheckers.length > 0
+      ) {
         this.selectedChecker = index;
         console.log(this.selectedChecker);
         let selChecker = this.board.find((item) => item.index === index);
@@ -127,6 +142,7 @@ export default {
     },
     async moveChecker(index) {
       if (this.selectedChecker !== null && this.validMoves.includes(index)) {
+        this.currentMove.push(this.currentPlayer, this.selectedChecker, index);
         this.board[index].hasChecker = true;
         this.board[index].checkerColor =
           this.board[this.selectedChecker].checkerColor;
@@ -138,7 +154,6 @@ export default {
             Math.floor(index / 8) - Math.floor(this.selectedChecker / 8)
           ) === 2
         ) {
-          this.currentMove.push(this.currentPlayer, this.selectChecker, index);
           const middleIndex = (index + this.selectedChecker) / 2;
           this.board[middleIndex].hasChecker = false;
           this.board[middleIndex].checkerColor = null;
@@ -146,13 +161,13 @@ export default {
 
         this.selectedChecker = null;
         this.validMoves = [];
-        console.log(this.currentMove);
-        
+        // console.log(this.currentMove);
+
         this.currentPlayer =
           this.currentPlayer === "white-checker"
             ? "black-checker"
             : "white-checker";
-        if (this.currentPlayer === "black-checker") this.botMove();
+        // if (this.currentPlayer === "black-checker") this.botMove();
         await this.saveBoard();
       }
     },
@@ -164,8 +179,8 @@ export default {
       const potentialAttacks = [
         index + direction * 14,
         index + direction * 18,
-        index + direction * -7,
-        index + direction * -9,
+        index + direction * (-7),
+        index + direction * (-9),
       ];
       potentialAttacks.forEach((move) => {
         if (this.isValidMove(index, move)) {
@@ -191,8 +206,8 @@ export default {
       const potentialAttacks = [
         index + direction * 14,
         index + direction * 18,
-        index + direction * -7,
-        index + direction * -9,
+        index + direction * (-7),
+        index + direction * (-9),
       ];
       potentialAttacks.forEach((move) => {
         if (this.isValidMove(index, move)) {
@@ -203,14 +218,14 @@ export default {
       return moves;
     },
 
-
     isValidMove(startIndex, endIndex) {
       if (endIndex < 0 || endIndex >= 64) return false;
       if (this.board[endIndex].hasChecker) return false;
 
       const rowDiff = Math.floor(endIndex / 8) - Math.floor(startIndex / 8);
       const colDiff = (endIndex % 8) - (startIndex % 8);
-      const direction = this.board[startIndex].checkerColor === "white-checker" ? -1 : 1;
+      const direction =
+        this.board[startIndex].checkerColor === "white-checker" ? -1 : 1;
       if (
         Math.abs(rowDiff) === 1 &&
         Math.abs(colDiff) === 1 &&
@@ -236,14 +251,21 @@ export default {
       //if(this.currentPlayer = "black-checker");
       const blackCheckers = [];
       for (let i = 0; i < this.board.length; i++) {
-        if (this.board[i].checkerColor === "black-checker" && this.board[i].hasChecker) blackCheckers.push(this.board[i]);
+        if (
+          this.board[i].checkerColor === "black-checker" &&
+          this.board[i].hasChecker
+        )
+          blackCheckers.push(this.board[i]);
       }
       // this.blackCheckers = blackCheckers;
       console.log("бот сделал ход");
       const validCheckers = [];
       for (let i = 0; i < blackCheckers.length; i++) {
         if (this.getValidMoves(blackCheckers[i].index).length > 0) {
-          validCheckers.push([blackCheckers[i].index, this.getValidMoves(blackCheckers[i].index)]);
+          validCheckers.push([
+            blackCheckers[i].index,
+            this.getValidMoves(blackCheckers[i].index),
+          ]);
         }
       }
 
@@ -256,7 +278,6 @@ export default {
       this.selectedChecker = randomBlackChecker;
       this.moveChecker(randomMove);
     },
-
 
     botAI(validCheckers) {
       const randomBlackCheckerIndex = Math.floor(
@@ -283,6 +304,11 @@ export default {
 </script>
 
 <style>
+.curr-player{
+  position:absolute;
+  left: 50px;
+  font-size: large;
+}
 .board-container {
   display: flex;
   justify-content: center;
