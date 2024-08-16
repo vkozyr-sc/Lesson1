@@ -15,6 +15,7 @@
         @select="selectChecker"
       />
     </div>
+    <textarea name="text" id="text" class="text-area" >{{ currentMove }}</textarea>
     <button class="btn" @click="restartGame()">Restart</button>
   </div>
 </template>
@@ -34,18 +35,28 @@ export default {
       currentPlayer: "white-checker",
       validMoves: [],
       currentMove: [],
+      availableWhiteChecker: [],
+      availableBlackChecker: [],
       // underAttackWhite: [],
       // underAttackBlack: [],
     };
   },
   async created() {
     await this.loadBoard();
+    // await this.loadMove();
   },
 
   methods: {
     async loadBoard() {
       const response = await axios.get(`http://localhost:3000/board`);
       this.board = response.data;
+      //const responseMove = await axios.get(`http://localhost:3000/move`);
+      //this.currentMove = responseMove.data;
+    },
+
+    async loadMove(){
+      const response = await axios.get(`http://localhost:3000/move`);
+      this.currentMove = response.data;
     },
     async restartBoard() {
       const response = await axios.get(`http://localhost:3000/restart`);
@@ -57,6 +68,7 @@ export default {
     async saveMove() {
       await axios.post("http://localhost:3000/move", this.currentMove);
     },
+
     async restartGame() {
       await this.restartBoard();
       this.selectedChecker = null;
@@ -130,9 +142,9 @@ export default {
         //&& validWhiteCheckers.includes(index) && validWhiteCheckers.length > 0
       ) {
         this.selectedChecker = index;
-        console.log(this.selectedChecker);
-        let selChecker = this.board.find((item) => item.index === index);
-        selChecker.id[0] = 3;
+        // console.log(this.selectedChecker);
+        // let selChecker = this.board.find((item) => item.index === index);
+        // selChecker.id[0] = 3;
 
         this.validMoves = this.getValidMoves(index);
       } else {
@@ -169,6 +181,7 @@ export default {
             : "white-checker";
         // if (this.currentPlayer === "black-checker") this.botMove();
         await this.saveBoard();
+        await this.saveMove();
       }
     },
     getValidMoves(index) {
@@ -179,8 +192,8 @@ export default {
       const potentialAttacks = [
         index + direction * 14,
         index + direction * 18,
-        index + direction * (-7),
-        index + direction * (-9),
+        index + direction * (-14),
+        index + direction * (-18),
       ];
       potentialAttacks.forEach((move) => {
         if (this.isValidMove(index, move)) {
@@ -206,8 +219,8 @@ export default {
       const potentialAttacks = [
         index + direction * 14,
         index + direction * 18,
-        index + direction * (-7),
-        index + direction * (-9),
+        index + direction * (-14),
+        index + direction * (-18),
       ];
       potentialAttacks.forEach((move) => {
         if (this.isValidMove(index, move)) {
@@ -228,8 +241,8 @@ export default {
         this.board[startIndex].checkerColor === "white-checker" ? -1 : 1;
       if (
         Math.abs(rowDiff) === 1 &&
-        Math.abs(colDiff) === 1 &&
-        rowDiff === direction
+        Math.abs(colDiff) === 1 
+        // && rowDiff === direction
       ) {
         return true;
       } else if (Math.abs(rowDiff) === 2 && Math.abs(colDiff) === 2) {
@@ -294,7 +307,12 @@ export default {
 
       return [newRandBlackChecker, randMove];
     },
+
+    dispalyLog(){
+      
+    }
   },
+
   // mounted() {
   //   if (this.currentPlayer === "black-checker") {
   //     this.makeAIMove();
@@ -306,10 +324,12 @@ export default {
 <style>
 .curr-player{
   position:absolute;
-  left: 50px;
+  bottom: 0;
+  left: 350px;
   font-size: large;
 }
 .board-container {
+  position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -327,9 +347,16 @@ export default {
   background-color: #000;
 }
 
+.text-area{
+  position: relative;
+  width: 170px;
+  height: 340px;
+}
+
 .btn {
   margin-top: 15px;
   position: relative;
+  bottom: 0;
   left: 80px;
   /* align-self:center; */
   padding: 10px 15px;
