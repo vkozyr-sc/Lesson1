@@ -1,16 +1,16 @@
 <template>
   <div id="app">
-    <CheckerBoard />
+    <Board />
   </div>
 </template>
 
 <script>
-import CheckerBoard from "./components/CheckerBoard.vue";
+import Board from "./components/Board.vue";
 
 export default {
   name: "App",
   components: {
-    CheckerBoard,
+    Board,
   },
 };
 </script>

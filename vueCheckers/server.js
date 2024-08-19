@@ -34,7 +34,8 @@ let board = Array.from({ length: 64 }, (_, index) => ({
     index < 24 ? "black-checker" : index >= 40 ? "white-checker" : null,
 }));
 
-let moves = ["a", 'b'];
+let moves = [];
+let player = 'white-checker';
 
 app.get('/board', (req, res) => {
   res.json(board);
@@ -48,6 +49,15 @@ app.get('/move', (req, res) => {
   res.json(moves);
 });
 
+app.get('/state', (req, res) => {
+  res.json(player);
+})
+
+app.post('/state', (req, res) => {
+  player = req.body;
+  res.sendStatus(200);
+});
+
 app.post('/board', (req, res) => {
   board = req.body;
   res.sendStatus(200);
@@ -57,7 +67,6 @@ app.post('/move', (req,res) => {
   moves = req.body;
   res.sendStatus(200);
 })
-
 
 // app.post('/restart', (req,res) => {
 //   boardStart = req.body;

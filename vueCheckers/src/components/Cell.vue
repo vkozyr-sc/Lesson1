@@ -3,7 +3,7 @@
     :class="['cell', cellColor, { highlight: isHighlighted }]"
     @click="movePiece"
   >
-    <CheckerPiece
+    <Checker
       v-if="hasChecker"
       :pieceColor="checkerColor"
       :isSelected="isSelected"
@@ -14,11 +14,11 @@
 </template>
 
 <script>
-import CheckerPiece from "./CheckerPiece.vue";
+import Checker from "./Checker.vue";
 
 export default {
   components: {
-    CheckerPiece,
+    Checker,
   },
   props: {
     cellColor: String,

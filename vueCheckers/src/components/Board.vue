@@ -2,7 +2,7 @@
   <div class="board-container">
     <h3 class="curr-player">Current player: {{ currentPlayer }}</h3>
     <div class="board">
-      <CheckerCell
+      <Cell
         v-for="(cell, index) in board"
         :key="index"
         :cellColor="cell.color"
@@ -21,12 +21,12 @@
 </template>
 
 <script>
-import CheckerCell from "./CheckerCell.vue";
+import Cell from "./Cell.vue";
 import axios from "axios";
 
 export default {
   components: {
-    CheckerCell,
+    Cell,
   },
   data() {
     return {
@@ -37,13 +37,13 @@ export default {
       currentMove: [],
       availableWhiteChecker: [],
       availableBlackChecker: [],
-      // underAttackWhite: [],
-      // underAttackBlack: [],
     };
   },
   async created() {
     await this.loadBoard();
-    // await this.loadMove();
+    await this.loadMove();
+    //await this.loadState();
+    //console.log(this.currentPlayer);
   },
 
   methods: {
@@ -53,22 +53,28 @@ export default {
       //const responseMove = await axios.get(`http://localhost:3000/move`);
       //this.currentMove = responseMove.data;
     },
-
     async loadMove(){
       const response = await axios.get(`http://localhost:3000/move`);
       this.currentMove = response.data;
+    },
+    async loadState(){
+      const response = await axios.get(`http://localhost:3000/state`);
+      this.currentPlayer = response.data;
     },
     async restartBoard() {
       const response = await axios.get(`http://localhost:3000/restart`);
       this.board = response.data;
     },
+
     async saveBoard() {
       await axios.post("http://localhost:3000/board", this.board);
     },
     async saveMove() {
       await axios.post("http://localhost:3000/move", this.currentMove);
     },
-
+    async saveState(){
+      await axios.post("http://localhost:3000/state", this.currentPlayer);
+    },
     async restartGame() {
       await this.restartBoard();
       this.selectedChecker = null;
@@ -180,8 +186,10 @@ export default {
             ? "black-checker"
             : "white-checker";
         // if (this.currentPlayer === "black-checker") this.botMove();
+        //console.log(this.currentState);
         await this.saveBoard();
         await this.saveMove();
+        await this.saveState();
       }
     },
     getValidMoves(index) {
