@@ -3,15 +3,15 @@ import { faker } from '@faker-js/faker'
 import 'dotenv/config'
 
 const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY, {
+  "https://vsmexkqyoarmracnmdgi.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZzbWV4a3F5b2FybXJhY25tZGdpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjM3MzAzMjQsImV4cCI6MjAzOTMwNjMyNH0.i7hJbqukHzi8gI2YEolHSXBNfpyzYmZjf0E8GZGxzeo", {
   auth: { persistSession: false }
 })
 const categories = ['Food', 'Housing', 'Car', 'Entertainment']
 
 async function seedTransactions() {
   // Delete existing data
-  const { error: deleteError } = await supabase.from('transactions')
+  const { error: deleteError } = await supabase.from('finance')
     .delete().gte('id', 0)
 
   if (deleteError) {
@@ -67,7 +67,7 @@ async function seedTransactions() {
     }
   }
 
-  const { error: insertError } = await supabase.from('transactions')
+  const { error: insertError } = await supabase.from('finance')
     .upsert(transactions)
 
   if (insertError) {
