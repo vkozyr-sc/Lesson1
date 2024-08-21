@@ -1,6 +1,11 @@
 <template>
   <div class="board-container">
-    <h3 class="curr-player">Current player: {{ currentPlayer }}</h3>
+    <div>
+      <h3 class="curr-player">Current player: {{ currentPlayer }}</h3>
+      <h3 class="curr-player">Black player: {{ currentblackCheckers }}</h3>
+      <h3 class="curr-player">White player: {{ currentWhiteCheckers }}</h3>
+      <button class="btn" @click="restartGame()">Restart</button>
+    </div>
     <div class="board">
       <Cell
         v-for="(cell, index) in board"
@@ -18,7 +23,6 @@
     <textarea name="text" id="text" class="text-area">{{
       currentMove
     }}</textarea>
-    <button class="btn" @click="restartGame()">Restart</button>
   </div>
 </template>
 
@@ -39,15 +43,31 @@ export default {
       currentMove: [],
       availableWhiteChecker: [],
       availableBlackChecker: [],
-      currentblackCheckers: [],
-      currentWhiteCheckers: [],
+      currentblackCheckers: 0,
+      currentWhiteCheckers: 0,
     };
   },
   async created() {
     await this.loadBoard();
     await this.loadMove();
+    // console.log(this.board);
     //await this.loadState();
     //console.log(this.currentPlayer);
+  },
+
+  updated(){
+    let amountWhite = 0; 
+    let amountBlack = 0;
+    for (let i = 0; i < this.board.length; i++) {
+      if(this.board[i].checkerColor === "white-checker"){
+        amountWhite++; 
+      }else if(this.board[i].checkerColor === "black-checker"){
+        amountBlack++;
+      }      
+    }
+    // console.log(amountBlack);
+    this.currentWhiteCheckers = amountWhite;
+    this.currentblackCheckers = amountBlack;
   },
 
   methods: {
@@ -173,6 +193,7 @@ export default {
       }
     },
     async moveChecker(index) {
+      let isBite = false;
       if (this.selectedChecker !== null && this.validMoves.includes(index)) {
         // console.log("move:" + index);
         this.currentMove.push(this.currentPlayer, this.selectedChecker, index);
@@ -187,6 +208,7 @@ export default {
             Math.floor(index / 8) - Math.floor(this.selectedChecker / 8)
           ) === 2
         ) {
+          isBite = true;
           const middleIndex = (index + this.selectedChecker) / 2;
           this.board[middleIndex].hasChecker = false;
           this.board[middleIndex].checkerColor = null;
@@ -196,9 +218,9 @@ export default {
         this.validMoves = [];
         // console.log(this.currentMove);
         this.validMoves = this.getValidAttacks(index);
-        if (this.validMoves.length > 0) {
+        let changeState = true;
+        if (this.validMoves.length > 0 && isBite) {
           console.log("current: " + this.convert(index));
-          console.log(true);
           // this.selectedChecker = index;
 
           const randomValidAttackIndex = Math.floor(
@@ -206,15 +228,19 @@ export default {
           );
           const randValidAttack = this.validMoves[randomValidAttackIndex];
           console.log("desired:" + this.convert(randValidAttack));
-
+          // this.selectedChecker = index;
           // this.moveChecker(randValidAttack);
-          this.validMoves = [];
-        }
 
-        this.currentPlayer =
-          this.currentPlayer === "white-checker"
+          changeState = false;
+        }
+        this.validMoves = [];
+
+        if(changeState) {
+          this.currentPlayer =
+            this.currentPlayer === "white-checker"
             ? "black-checker"
             : "white-checker";
+        }
         // if (this.currentPlayer === "black-checker") this.botMove();
         //console.log(this.currentState);
         await this.saveBoard();
@@ -386,12 +412,6 @@ export default {
 </script>
 
 <style>
-.curr-player {
-  position: absolute;
-  bottom: 0;
-  left: 350px;
-  font-size: large;
-}
 .board-container {
   position: relative;
   display: flex;
@@ -410,6 +430,15 @@ export default {
   box-sizing: border-box;
   background-color: #000;
 }
+.curr-player {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  bottom: 0;
+  margin-right: 5px;
+  /* /left: 350px; */
+  font-size: large;
+}
 
 .text-area {
   position: relative;
@@ -422,6 +451,8 @@ export default {
   position: relative;
   bottom: 0;
   left: 80px;
+  margin-right: 140px;
+  /* right: 50px; */
   /* align-self:center; */
   padding: 10px 15px;
   background: none;
