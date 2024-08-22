@@ -27,7 +27,7 @@ function setColor(index){
   else if(index < 24 && isChecker(index)){
     return "black-checker"
   }
-  else if(index > 40 && isChecker(index)){
+  else if(index >= 40 && isChecker(index)){
     return "white-checker"
   }
   // else if(){

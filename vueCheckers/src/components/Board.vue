@@ -2,7 +2,7 @@
   <div class="board-container">
     <div>
       <h3 class="curr-player">Current player: {{ currentPlayer }}</h3>
-      <h3 class="curr-player">Black player: {{ currentblackCheckers }}</h3>
+      <h3 class="curr-player">Black player: {{ currentBlackCheckers }}</h3>
       <h3 class="curr-player">White player: {{ currentWhiteCheckers }}</h3>
       <button class="btn" @click="restartGame()">Restart</button>
     </div>
@@ -16,6 +16,7 @@
         :isSelected="selectedChecker === index"
         :isHighlighted="isHighlighted(index)"
         :cellIndex="index"
+        :board="board"
         @move="moveChecker"
         @select="selectChecker"
       />
@@ -43,7 +44,7 @@ export default {
       currentMove: [],
       availableWhiteChecker: [],
       availableBlackChecker: [],
-      currentblackCheckers: 0,
+      currentBlackCheckers: 0,
       currentWhiteCheckers: 0,
     };
   },
@@ -67,7 +68,7 @@ export default {
     }
     // console.log(amountBlack);
     this.currentWhiteCheckers = amountWhite;
-    this.currentblackCheckers = amountBlack;
+    this.currentBlackCheckers = amountBlack;
   },
 
   methods: {
@@ -395,7 +396,9 @@ export default {
       return [newRandBlackChecker, randMove];
     },
 
-    dispalyLog() {},
+    dispalyLog() {
+      
+    },
 
     convert(index) {
       const id = [Math.floor(index / 8), index % 8];

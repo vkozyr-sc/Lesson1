@@ -21,6 +21,7 @@ export default {
     Checker,
   },
   props: {
+    //board: Array,
     cellColor: String,
     hasChecker: Boolean,
     checkerColor: String,
@@ -35,6 +36,8 @@ export default {
     selectPiece(index) {
       this.$emit("select", index);
     },
+
+
   },
 };
 </script>
