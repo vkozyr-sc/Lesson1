@@ -5,7 +5,6 @@
   >
     <Checker
       v-if="hasChecker"
-      :board="board"
       :pieceColor="checkerColor"
       :isSelected="isSelected"
       :pieceIndex="cellIndex"
@@ -22,7 +21,7 @@ export default {
     Checker,
   },
   props: {
-    board: Array,
+    //board: Array,
     cellColor: String,
     hasChecker: Boolean,
     checkerColor: String,
@@ -34,9 +33,8 @@ export default {
     movePiece() {
       this.$emit("move", this.cellIndex);
     },
-    selectPiece(value) {
-      // console.log(validMoves, selectedChecker);
-      this.$emit("select", value);
+    selectPiece(index) {
+      this.$emit("select", index);
     },
 
 

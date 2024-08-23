@@ -53,7 +53,6 @@ let board = Array.from({ length: 64 }, (_, index) => ({
   checkerColor: setColor(index),
 }));
 
-let validCheckers = [];
 let moves = [];
 let player = 'white-checker';
 
@@ -73,13 +72,6 @@ app.get('/state', (req, res) => {
   res.json(player);
 })
 
-app.get('/bot', (req, res) => {
-  res.json(
-    botAI()
-    // setTimeout(botAI, 1000)
-  );
-})
-
 app.post('/state', (req, res) => {
   player = req.body;
   res.sendStatus(200);
@@ -95,32 +87,10 @@ app.post('/move', (req,res) => {
   res.sendStatus(200);
 })
 
-app.post('/botPost', (req,res)=>{
-  validCheckers = req.body;
-  res.sendStatus(200);
-})
 // app.post('/restart', (req,res) => {
 //   boardStart = req.body;
 //   res.sendStatus(200);
 // })
-
-function botAI(validCheckers) {
-  console.log(validCheckers);
-  const randomBlackCheckerIndex = Math.floor(
-    Math.random() * validCheckers.length
-  );
-  const randBlackChecker = validCheckers[randomBlackCheckerIndex];
-
-  const randomBotMoveIndex = Math.floor(
-    Math.random() * randBlackChecker[1].length
-  );
-  const randMove = randBlackChecker[1][randomBotMoveIndex];
-
-  const newRandBlackChecker = randBlackChecker[0];
-
-  return [newRandBlackChecker, randMove];
-}
-
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
