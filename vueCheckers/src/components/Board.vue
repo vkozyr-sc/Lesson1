@@ -96,9 +96,9 @@ export default {
       const response = await axios.get(`http://localhost:3000/restart`);
       this.board = response.data;
     },
-    // async postValidChecker(validCheckers){
-    //   await axios.post("http://localhost:3000/bot", validCheckers);
-    // },
+    async postValidChecker(validCheckers){
+      await axios.post("http://localhost:3000/botPost", validCheckers);
+    },
     async saveBoard() {
       await axios.post("http://localhost:3000/board", this.board);
     },
@@ -214,13 +214,14 @@ export default {
 
       let randomBlackChecker = 0;
       let randomMove = 0;
-      await axios.post("http://localhost:3000/botPost", validCheckers);
-      [randomBlackChecker, randomMove] = await this.getBotMove(validCheckers);
-
+      await this.postValidChecker(validCheckers);
+      // await axios.post("http://localhost:3000/botPost", validCheckers);
+      [randomBlackChecker, randomMove] = await this.getBotMove();
+      console.log(randomBlackChecker, randomMove);
       this.validMoves = [randomMove];
       this.selectedChecker = randomBlackChecker;
       this.moveChecker(randomMove);
-
+      
     },
 
     // botAI(validCheckers) {

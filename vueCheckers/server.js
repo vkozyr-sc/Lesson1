@@ -15,12 +15,6 @@ function isChecker(index) {
 }
 
 function setColor(index){
-  // if(isChecker(index) === true){
-  //   return index < 24 && isChecker(index) ? "black-checker" : index >= 40 ? "white-checker" : null;
-  // }
-  // else{
-  //   return null;
-  // }
   if(!isChecker(index)){
     return null
   }
@@ -30,9 +24,6 @@ function setColor(index){
   else if(index >= 40 && isChecker(index)){
     return "white-checker"
   }
-  // else if(){
-  //   return null
-  // }
 }
 
 
@@ -74,8 +65,9 @@ app.get('/state', (req, res) => {
 })
 
 app.get('/bot', (req, res) => {
+  const [randBlackChecker, randMove] = botAI(validCheckers);
   res.json(
-    botAI()
+    [randBlackChecker, randMove]
     // setTimeout(botAI, 1000)
   );
 })
