@@ -47,6 +47,7 @@ let board = Array.from({ length: 64 }, (_, index) => ({
 let validCheckers = [];
 let moves = [];
 let player = 'white-checker';
+let randBlack, randMove;
 
 app.get('/board', (req, res) => {
   res.json(board);
@@ -65,7 +66,8 @@ app.get('/state', (req, res) => {
 })
 
 app.get('/bot', (req, res) => {
-  const [randBlackChecker, randMove] = botAI(validCheckers);
+  const [randBlackChecker, randMove] = setTimeout(botAI, 2000, validCheckers) ;
+  // setValid(validCheckers);
   res.json(
     [randBlackChecker, randMove]
     // setTimeout(botAI, 1000)

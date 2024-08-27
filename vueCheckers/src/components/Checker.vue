@@ -61,7 +61,7 @@ export default {
         selectedChecker = null;
         validMoves = [];
       }
-      console.log(validMoves, selectedChecker);
+      // console.log(validMoves, selectedChecker);
       this.$emit("select", {validMoves, selectedChecker});
       //return [validMoves, selectedChecker];
     },

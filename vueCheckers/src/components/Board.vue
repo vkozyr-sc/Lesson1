@@ -75,8 +75,8 @@ export default {
 
   methods: {
     async getBotMove(){
-      const [randBlackChecker, randMove] = await axios.get(`http://localhost:3000/bot`);
-      return [randBlackChecker, randMove];
+      const response = await axios.get(`http://localhost:3000/bot`);
+      return response.data;
     },
     async loadBoard() {
       const response = await axios.get(`http://localhost:3000/board`);
@@ -118,7 +118,7 @@ export default {
     },
 
     selectChecker({validMoves, selectedChecker}) {
-      console.log(validMoves, selectedChecker);
+      // console.log(validMoves, selectedChecker);
       this.validMoves = validMoves
       this.selectedChecker = selectedChecker;
     },
@@ -217,7 +217,10 @@ export default {
       await this.postValidChecker(validCheckers);
       // await axios.post("http://localhost:3000/botPost", validCheckers);
       [randomBlackChecker, randomMove] = await this.getBotMove();
-      console.log(randomBlackChecker, randomMove);
+      // const [randBlackChecker, randMove] = await axios.get(`http://localhost:3000/bot`);
+      const randBlack = await axios.get(`http://localhost:3000/bot`);
+      // console.log(randBlack);
+      // console.log(randomBlackChecker, randomMove);
       this.validMoves = [randomMove];
       this.selectedChecker = randomBlackChecker;
       this.moveChecker(randomMove);
